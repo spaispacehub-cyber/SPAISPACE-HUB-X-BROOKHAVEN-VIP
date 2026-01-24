@@ -369,7 +369,7 @@ function Update:Window(Config)
 	Top.BackgroundTransparency = 1;
 	CreateRounded(Top, 5);
 	local NameHub = Instance.new("TextLabel");
-	NameHub.Name = "NameHub";
+	NameHub.Name = "SPAISPACEHUB";
 	NameHub.Parent = Top;
 	NameHub.BackgroundColor3 = Color3.fromRGB(255, 255, 255);
 	NameHub.BackgroundTransparency = 1;
@@ -505,4 +505,5 @@ function Update:Window(Config)
 	ScrollSettings.Parent = SettingsMenuList;
 	ScrollSettings.Active = true;
 	ScrollSettings.BackgroundColor3 = Color3.fromRGB(10, 10, 10);
+
 	ScrollSettings.Posi
