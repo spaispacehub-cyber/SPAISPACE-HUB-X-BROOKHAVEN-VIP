@@ -127,7 +127,7 @@ function Update:Notify(desc)
 	Image.BackgroundTransparency = 1;
 	Image.Position = UDim2.new(0, 8, 0, 8);
 	Image.Size = UDim2.new(0, 45, 0, 45);
-	Image.Image = "rbxassetid://13940080072";
+	Image.Image = "rbxassetid://92582199877885";
 	Title.Parent = Frame;
 	Title.BackgroundColor3 = _G.Primary;
 	Title.BackgroundTransparency = 1;
@@ -507,3 +507,4 @@ function Update:Window(Config)
 	ScrollSettings.BackgroundColor3 = Color3.fromRGB(10, 10, 10);
 
 	ScrollSettings.Posi
+
