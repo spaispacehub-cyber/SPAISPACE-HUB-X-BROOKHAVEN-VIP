@@ -7,7 +7,7 @@ elseif game.PlaceId == 7449423635 then
 	World3 = true;
 end;
 
-local Update = (loadstring(Game:HttpGet("https://raw.githubusercontent.com/spaispacehub-cyber/SPAISPACE-HUB-X-BROOKHAVEN-VIP/refs/heads/main/update%20spaispace%20hub%20x%20TRaO%20blox%20fruit%20.lua")))();
+local Update = (loadstring(Game:HttpGet("https://raw.githubusercontent.com/RTaOexe1/rtao_dev/refs/heads/main/RTaO_UI_1.lua")))();
 if Update:LoadAnimation() then
 	Update:StartLoad();
 end;
