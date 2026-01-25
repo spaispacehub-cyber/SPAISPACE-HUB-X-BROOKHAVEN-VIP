@@ -1,5 +1,5 @@
-if (game:GetService("CoreGui")):FindFirstChild("SPAISPACEHUB X SPAISPACEHUB X RTaO") and (game:GetService("CoreGui")):FindFirstChild("ScreenGui") then
-	(game:GetService("CoreGui")).SPAISPACEHUB X SPAISPACEHUB X RTaO:Destroy();
+if (game:GetService("CoreGui")):FindFirstChild("RTaO") and (game:GetService("CoreGui")):FindFirstChild("ScreenGui") then
+	(game:GetService("CoreGui")).RTaO:Destroy();
 	(game:GetService("CoreGui")).ScreenGui:Destroy();
 end;
 _G.Primary = Color3.fromRGB(100, 100, 100);
@@ -75,7 +75,7 @@ ImageButton.AutoButtonColor = false;
 MakeDraggable(ImageButton, OutlineButton);
 CreateRounded(ImageButton, 10);
 ImageButton.MouseButton1Click:connect(function()
-	(game.CoreGui:FindFirstChild("SPAISPACEHUB X SPAISPACEHUB X RTaO")).Enabled = not (game.CoreGui:FindFirstChild("SPAISPACEHUB X SPAISPACEHUB X RTaO")).Enabled;
+	(game.CoreGui:FindFirstChild("RTaO")).Enabled = not (game.CoreGui:FindFirstChild("RTaO")).Enabled;
 end);
 local NotificationFrame = Instance.new("ScreenGui");
 NotificationFrame.Name = "NotificationFrame";
@@ -134,7 +134,7 @@ function Update:Notify(desc)
 	Title.Position = UDim2.new(0, 55, 0, 14);
 	Title.Size = UDim2.new(0, 10, 0, 20);
 	Title.Font = Enum.Font.GothamBold;
-	Title.Text = "SPAISPACEHUB X SPAISPACEHUB X RTaO";
+	Title.Text = "RTaO";
 	Title.TextColor3 = Color3.fromRGB(255, 255, 255);
 	Title.TextSize = 16;
 	Title.TextXAlignment = Enum.TextXAlignment.Left;
@@ -184,7 +184,7 @@ function Update:StartLoad()
 	MainLoaderFrame.BorderSizePixel = 0;
 	local TitleLoader = Instance.new("TextLabel");
 	TitleLoader.Parent = MainLoaderFrame;
-	TitleLoader.Text = "SPAISPACEHUB X SPAISPACEHUB X RTaO Dev";
+	TitleLoader.Text = "RTaO Dev";
 	TitleLoader.Font = Enum.Font.FredokaOne;
 	TitleLoader.TextSize = 50;
 	TitleLoader.TextColor3 = Color3.fromRGB(255, 255, 255);
@@ -260,16 +260,16 @@ local SettingsLib = {
 };
 (getgenv()).LoadConfig = function()
 	if readfile and writefile and isfile and isfolder then
-		if not isfolder("SPAISPACEHUB X SPAISPACEHUB X RTaO") then
-			makefolder("SPAISPACEHUB X SPAISPACEHUB X RTaO");
+		if not isfolder("RTaO") then
+			makefolder("RTaO");
 		end;
-		if not isfolder("SPAISPACEHUB X SPAISPACEHUB X RTaO/Library/") then
-			makefolder("SPAISPACEHUB X SPAISPACEHUB X RTaO/Library/");
+		if not isfolder("RTaO/Library/") then
+			makefolder("RTaO/Library/");
 		end;
-		if not isfile(("SPAISPACEHUB X SPAISPACEHUB X RTaO/Library/" .. game.Players.LocalPlayer.Name .. ".json")) then
-			writefile("SPAISPACEHUB X SPAISPACEHUB X RTaO/Library/" .. game.Players.LocalPlayer.Name .. ".json", (game:GetService("HttpService")):JSONEncode(SettingsLib));
+		if not isfile(("RTaO/Library/" .. game.Players.LocalPlayer.Name .. ".json")) then
+			writefile("RTaO/Library/" .. game.Players.LocalPlayer.Name .. ".json", (game:GetService("HttpService")):JSONEncode(SettingsLib));
 		else
-			local Decode = (game:GetService("HttpService")):JSONDecode(readfile("SPAISPACEHUB X SPAISPACEHUB X RTaO/Library/" .. game.Players.LocalPlayer.Name .. ".json"));
+			local Decode = (game:GetService("HttpService")):JSONDecode(readfile("RTaO/Library/" .. game.Players.LocalPlayer.Name .. ".json"));
 			for i, v in pairs(Decode) do
 				SettingsLib[i] = v;
 			end;
@@ -281,15 +281,15 @@ local SettingsLib = {
 end;
 (getgenv()).SaveConfig = function()
 	if readfile and writefile and isfile and isfolder then
-		if not isfile(("SPAISPACEHUB X RTaO/Library/" .. game.Players.LocalPlayer.Name .. ".json")) then
+		if not isfile(("RTaO/Library/" .. game.Players.LocalPlayer.Name .. ".json")) then
 			(getgenv()).Load();
 		else
-			local Decode = (game:GetService("HttpService")):JSONDecode(readfile("SPAISPACEHUB X RTaO/Library/" .. game.Players.LocalPlayer.Name .. ".json"));
+			local Decode = (game:GetService("HttpService")):JSONDecode(readfile("RTaO/Library/" .. game.Players.LocalPlayer.Name .. ".json"));
 			local Array = {};
 			for i, v in pairs(SettingsLib) do
 				Array[i] = v;
 			end;
-			writefile("SPAISPACEHUB X RTaO/Library/" .. game.Players.LocalPlayer.Name .. ".json", (game:GetService("HttpService")):JSONEncode(Array));
+			writefile("RTaO/Library/" .. game.Players.LocalPlayer.Name .. ".json", (game:GetService("HttpService")):JSONEncode(Array));
 		end;
 	else
 		return warn("Status : Undetected Executor");
@@ -320,13 +320,13 @@ function Update:Window(Config)
 	local currentpage = "";
 	local keybind = keybind or Enum.KeyCode.RightControl;
 	local yoo = string.gsub(tostring(keybind), "Enum.KeyCode.", "");
-	local SPAISPACEHUB X RTaO = Instance.new("ScreenGui");
-	SPAISPACEHUB X RTaO.Name = "SPAISPACEHUB X RTaO";
-	SPAISPACEHUB X RTaO.Parent = game.CoreGui;
-	SPAISPACEHUB X RTaO.DisplayOrder = 999;
+	local RTaO = Instance.new("ScreenGui");
+	RTaO.Name = "SPAISPACE X RTaO";
+	RTaO.Parent = game.CoreGui;
+	RTaO.DisplayOrder = 999;
 	local OutlineMain = Instance.new("Frame");
 	OutlineMain.Name = "OutlineMain";
-	OutlineMain.Parent = SPAISPACEHUB X RTaO;
+	OutlineMain.Parent = RTaO;
 	OutlineMain.ClipsDescendants = true;
 	OutlineMain.AnchorPoint = Vector2.new(0.5, 0.5);
 	OutlineMain.BackgroundColor3 = Color3.fromRGB(30, 30, 30);
@@ -369,7 +369,7 @@ function Update:Window(Config)
 	Top.BackgroundTransparency = 1;
 	CreateRounded(Top, 5);
 	local NameHub = Instance.new("TextLabel");
-	NameHub.Name = "SPAISPACEHUB";
+	NameHub.Name = "NameHub";
 	NameHub.Parent = Top;
 	NameHub.BackgroundColor3 = Color3.fromRGB(255, 255, 255);
 	NameHub.BackgroundTransparency = 1;
@@ -378,7 +378,7 @@ function Update:Window(Config)
 	NameHub.AnchorPoint = Vector2.new(0, 0.5);
 	NameHub.Size = UDim2.new(0, 1, 0, 25);
 	NameHub.Font = Enum.Font.GothamBold;
-	NameHub.Text = "SPAISPACEHUB X RTaO";
+	NameHub.Text = "SPAISPACE X RTaO";
 	NameHub.TextSize = 20;
 	NameHub.TextColor3 = Color3.fromRGB(255, 255, 255);
 	NameHub.TextXAlignment = Enum.TextXAlignment.Left;
@@ -411,7 +411,7 @@ function Update:Window(Config)
 	CloseButton.ImageColor3 = Color3.fromRGB(245, 245, 245);
 	CreateRounded(CloseButton, 3);
 	CloseButton.MouseButton1Click:connect(function()
-		(game.CoreGui:FindFirstChild("SPAISPACEHUB X RTaO")).Enabled = not (game.CoreGui:FindFirstChild("SPAISPACEHUB X RTaO")).Enabled;
+		(game.CoreGui:FindFirstChild("RTaO")).Enabled = not (game.CoreGui:FindFirstChild("RTaO")).Enabled;
 	end);
 	local ResizeButton = Instance.new("ImageButton");
 	ResizeButton.Name = "ResizeButton";
@@ -504,7 +504,4 @@ function Update:Window(Config)
 	ScrollSettings.Name = "ScrollSettings";
 	ScrollSettings.Parent = SettingsMenuList;
 	ScrollSettings.Active = true;
-	ScrollSettings.BackgroundColor3 = Color3.fromRGB(10, 10, 10);
-
-	ScrollSettings.Posi
-
+	ScrollSettings.BackgroundColor3 = Color3.fromRGB(10, 10
