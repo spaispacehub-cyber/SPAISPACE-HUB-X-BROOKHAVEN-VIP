@@ -157,4 +157,5 @@ video.Size = UDim2.fromOffset(300,170)
 video.Position = UDim2.fromOffset(25,60)
 video.Video = "rbxassetid://10949038558" -- video demo
 video.Looped = true
+
 video:Play()
