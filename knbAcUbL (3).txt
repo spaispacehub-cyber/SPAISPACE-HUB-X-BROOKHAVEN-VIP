@@ -1,0 +1,620 @@
+--[[
+    ██╗  ██╗ █████╗ ███████╗███████╗    ██╗  ██╗██╗   ██╗██████╗
+    ██║  ██║██╔══██╗╚══███╔╝██╔════╝    ██║  ██║██║   ██║██╔══██╗
+    ███████║███████║  ███╔╝ █████╗      ███████║██║   ██║██████╔╝
+    ██╔══██║██╔══██║ ███╔╝  ██╔══╝      ██╔══██║██║   ██║██╔══██╗
+    ██║  ██║██║  ██║███████╗███████╗    ██║  ██║╚██████╔╝██████╔╝
+    ╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝╚══════╝    ╚═╝  ╚═╝ ╚═════╝ ╚═════╝
+    HazeHub — Blox Fruits Fake Gift Script v2
+--]]
+
+local Players            = game:GetService("Players")
+local TweenService       = game:GetService("TweenService")
+local MarketplaceService = game:GetService("MarketplaceService")
+local UserInputService   = game:GetService("UserInputService")
+
+local localPlayer = Players.LocalPlayer
+local playerGui   = localPlayer:WaitForChild("PlayerGui")
+
+-- ============================================================
+--  CONFIG
+-- ============================================================
+local Config = {
+    FakeBalance   = 5000000,
+    BuyAccent     = Color3.fromRGB(0,   110, 255),
+    BuyAccentDark = Color3.fromRGB(0,   60,  160),
+    BgDark        = Color3.fromRGB(18,  18,  24),
+    BgMid         = Color3.fromRGB(28,  28,  38),
+    BgLight       = Color3.fromRGB(48,  48,  62),
+    TextMain      = Color3.fromRGB(240, 240, 255),
+    TextSub       = Color3.fromRGB(160, 160, 190),
+    PanelRed      = Color3.fromRGB(180, 20,  20),
+    PanelRedDark  = Color3.fromRGB(30,  8,   8),
+}
+
+-- ============================================================
+--  FRUIT DATABASE
+-- ============================================================
+local BLOX_LOGO = "rbxassetid://2804185542"
+
+local Fruits = {
+    {name="Bomb",    id=44669609, price=275,  icon=BLOX_LOGO, outline=Color3.fromRGB(80,80,80)    },
+    {name="Spike",   id=44669616, price=300,  icon=BLOX_LOGO, outline=Color3.fromRGB(80,80,80)    },
+    {name="Chop",    id=44669618, price=100,  icon=BLOX_LOGO, outline=Color3.fromRGB(80,80,80)    },
+    {name="Spring",  id=44669621, price=60,   icon=BLOX_LOGO, outline=Color3.fromRGB(80,80,80)    },
+    {name="Kilo",    id=44669613, price=70,   icon=BLOX_LOGO, outline=Color3.fromRGB(80,80,80)    },
+    {name="Smoke",   id=44669624, price=100,  icon=BLOX_LOGO, outline=Color3.fromRGB(180,180,180) },
+    {name="Spin",    id=44669628, price=180,  icon=BLOX_LOGO, outline=Color3.fromRGB(80,80,80)    },
+    {name="Flame",   id=44669633, price=550,  icon=BLOX_LOGO, outline=Color3.fromRGB(220,80,20)   },
+    {name="Ice",     id=44669637, price=350,  icon=BLOX_LOGO, outline=Color3.fromRGB(160,220,255) },
+    {name="Sand",    id=44669641, price=420,  icon=BLOX_LOGO, outline=Color3.fromRGB(200,170,80)  },
+    {name="Dark",    id=44669644, price=500,  icon=BLOX_LOGO, outline=Color3.fromRGB(80,20,120)   },
+    {name="Diamond", id=44669648, price=600,  icon=BLOX_LOGO, outline=Color3.fromRGB(160,220,255) },
+    {name="Light",   id=44669651, price=650,  icon=BLOX_LOGO, outline=Color3.fromRGB(240,220,100) },
+    {name="Rubber",  id=44669655, price=750,  icon=BLOX_LOGO, outline=Color3.fromRGB(220,60,60)   },
+    {name="Barrier", id=44669659, price=800,  icon=BLOX_LOGO, outline=Color3.fromRGB(180,180,220) },
+    {name="Magma",   id=44669663, price=1300, icon="rbxthumb://type=Asset&id=111233020985043&w=150&h=150", outline=Color3.fromRGB(200,60,20)},
+    {name="Quake",   id=44669668, price=1000, icon=BLOX_LOGO, outline=Color3.fromRGB(160,140,100) },
+    {name="Buddha",  id=44669672, price=1650,
+        icon    = "rbxthumb://type=Asset&id=11337649787&w=150&h=150",
+        outline = Color3.fromRGB(220,180,20)
+    },
+    {name="Love",    id=44669676, price=1300, icon=BLOX_LOGO, outline=Color3.fromRGB(255,100,160) },
+    {name="Spider",  id=44669679, price=1500, icon=BLOX_LOGO, outline=Color3.fromRGB(60,60,60)    },
+    {name="Sound",   id=44669683, price=1700, icon=BLOX_LOGO, outline=Color3.fromRGB(180,100,220) },
+    {name="Phoenix", id=44669687, price=1800, icon=BLOX_LOGO, outline=Color3.fromRGB(220,120,20)  },
+    {name="Portal",  id=44669691, price=2000,
+        icon    = "rbxthumb://type=Asset&id=12181754234&w=150&h=150",
+        outline = Color3.fromRGB(100,180,255)
+    },
+    {name="Paw",     id=44669694, price=2000, icon=BLOX_LOGO, outline=Color3.fromRGB(220,100,140) },
+    {name="Gravity", id=44669697, price=2500, icon=BLOX_LOGO, outline=Color3.fromRGB(140,60,200)  },
+    {name="Dough",   id=44669701, price=2400,  icon="rbxthumb://type=Asset&id=125845430464185&w=150&h=150", outline=Color3.fromRGB(220,180,100)},
+    {name="Shadow",  id=44669704, price=2900, icon=BLOX_LOGO, outline=Color3.fromRGB(80,20,120)   },
+    {name="Venom",   id=44669708, price=3000, icon=BLOX_LOGO, outline=Color3.fromRGB(60,180,40)   },
+    {name="Control", id=44669712, price=4000,
+        icon    = "rbxthumb://type=Asset&id=11330851538&w=150&h=150",
+        outline = Color3.fromRGB(40,180,255)
+    },
+    {name="Spirit",  id=44669716, price=3400, icon=BLOX_LOGO, outline=Color3.fromRGB(255,220,80)  },
+    {name="Dragon",  id=44669720, price=5000,
+        icon    = "rbxthumb://type=Asset&id=71929406555073&w=150&h=150",
+        outline = Color3.fromRGB(180,60,20)
+    },
+    {name="Leopard", id=44669724, price=3500, icon=BLOX_LOGO, outline=Color3.fromRGB(200,160,20)  },
+    {name="Kitsune", id=44669728, price=4000,
+        icon    = "rbxthumb://type=Asset&id=102325862990442&w=150&h=150",
+        outline = Color3.fromRGB(20,100,220)
+    },
+    {name="Yeti",    id=44669730, price=3000, icon="rbxthumb://type=Asset&id=74056126745233&w=150&h=150", outline=Color3.fromRGB(160,220,255) },
+    {name="Gas",     id=44669749, price=2500, icon="rbxthumb://type=Asset&id=87151676586578&w=150&h=150", outline=Color3.fromRGB(180,220,100)},
+}
+
+-- ============================================================
+--  UTILITIES
+-- ============================================================
+local function fmtComma(n)
+    local s = tostring(math.floor(n))
+    local k
+    repeat s, k = s:gsub("^(-?%d+)(%d%d%d)", "%1,%2") until k == 0
+    return s
+end
+
+local function corner(p, r)
+    local c = Instance.new("UICorner")
+    c.CornerRadius = UDim.new(0, r or 8)
+    c.Parent = p
+    return c
+end
+
+local function stroke(p, col, thick, trans)
+    local s = Instance.new("UIStroke")
+    s.Color        = col   or Color3.new(1,1,1)
+    s.Thickness    = thick or 1.5
+    s.Transparency = trans or 0.5
+    s.Parent = p
+    return s
+end
+
+local function lbl(parent, props)
+    local l = Instance.new("TextLabel")
+    l.BackgroundTransparency = 1
+    l.Font           = props.Font  or Enum.Font.GothamBold
+    l.TextSize       = props.Size  or 14
+    l.TextColor3     = props.Color or Config.TextMain
+    l.Text           = props.Text  or ""
+    l.TextXAlignment = props.Align or Enum.TextXAlignment.Left
+    l.Position       = props.Pos   or UDim2.new(0,0,0,0)
+    l.Size           = props.FS    or UDim2.new(1,0,1,0)
+    l.TextWrapped    = props.Wrap  or false
+    l.ZIndex         = props.Z     or 3
+    l.Parent         = parent
+    return l
+end
+
+local function robuxIcon(parent, size, pos, z)
+    local img = Instance.new("ImageLabel")
+    img.BackgroundTransparency = 1
+    img.Image    = "rbxasset://textures/ui/common/robux@3x.png"
+    img.Size     = UDim2.fromOffset(size, size)
+    img.Position = pos or UDim2.new(0,0,0,0)
+    img.ZIndex   = z or 3
+    img.Parent   = parent
+    return img
+end
+
+-- ============================================================
+--  PURCHASE COMPLETED MODAL
+-- ============================================================
+-- ============================================================
+--  SENDING GIFT NOTIFICATION  (top screen slide)
+-- ============================================================
+local function showGiftNotification(fruitName, recipient)
+    local cleanName = fruitName:match("^Permanent (.+)$") or fruitName
+
+    local gui = Instance.new("ScreenGui")
+    gui.DisplayOrder   = 1002
+    gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    gui.Parent         = playerGui
+
+    local container = Instance.new("Frame")
+    container.Size                   = UDim2.fromOffset(620, 60)
+    container.AnchorPoint            = Vector2.new(0.5, 0)
+    container.Position               = UDim2.new(0.5, 0, 0, -80)
+    container.BackgroundTransparency = 1
+    container.BorderSizePixel        = 0
+    container.Parent                 = gui
+
+    local line1 = Instance.new("TextLabel")
+    line1.Size                   = UDim2.new(1, 0, 0, 28)
+    line1.Position               = UDim2.fromOffset(0, 0)
+    line1.BackgroundTransparency = 1
+    line1.Font                   = Enum.Font.GothamBold
+    line1.TextSize               = 20
+    line1.TextColor3             = Color3.fromRGB(255, 255, 255)
+    line1.TextStrokeColor3       = Color3.fromRGB(0, 0, 0)
+    line1.TextStrokeTransparency = 0.4
+    line1.TextXAlignment         = Enum.TextXAlignment.Center
+    line1.RichText               = true
+    line1.Text                   = 'Sending gift <font color="rgb(255,200,50)">&lt;Permanent ' .. cleanName .. '&gt;</font> to ' .. recipient .. '...'
+    line1.Parent                 = container
+
+    local line2 = Instance.new("TextLabel")
+    line2.Size                   = UDim2.new(1, 0, 0, 28)
+    line2.Position               = UDim2.fromOffset(0, -30)
+    line2.BackgroundTransparency = 1
+    line2.Font                   = Enum.Font.GothamBold
+    line2.TextSize               = 20
+    line2.TextColor3             = Color3.fromRGB(80, 220, 120)
+    line2.TextStrokeColor3       = Color3.fromRGB(0, 0, 0)
+    line2.TextStrokeTransparency = 0.4
+    line2.TextXAlignment         = Enum.TextXAlignment.Center
+    line2.TextTransparency       = 1
+    line2.Text                   = 'Gift sent successfully!'
+    line2.Parent                 = container
+
+    local slideIn  = TweenInfo.new(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+    local slideOut = TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
+
+    TweenService:Create(container, slideIn, { Position = UDim2.new(0.5, 0, 0, 4) }):Play()
+
+    task.delay(2.0, function()
+        if not line2.Parent then return end
+        line2.TextTransparency = 0
+        TweenService:Create(line2, slideIn, { Position = UDim2.fromOffset(0, 30) }):Play()
+    end)
+
+    task.delay(6.0, function()
+        if not container.Parent then return end
+        TweenService:Create(container, slideOut, { Position = UDim2.new(0.5, 0, 0, -80) }):Play()
+        task.delay(0.6, function() gui:Destroy() end)
+    end)
+end
+
+local function showPurchaseDone(productInfo, recipient)
+    recipient = recipient or "Unknown"
+
+    local gui = Instance.new("ScreenGui")
+    gui.DisplayOrder   = 999
+    gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    gui.Parent         = playerGui
+
+    local modal = Instance.new("Frame")
+    modal.Size             = UDim2.fromOffset(400, 210)
+    modal.Position         = UDim2.fromScale(0.5, 0.5)
+    modal.AnchorPoint      = Vector2.new(0.5, 0.5)
+    modal.BackgroundColor3 = Config.BgMid
+    modal.BorderSizePixel  = 0
+    modal.Parent           = gui
+    corner(modal, 14)
+    stroke(modal, Color3.fromRGB(90,90,100), 1.5, 0.3)
+
+    lbl(modal, {Text="Purchase Completed", Size=17, Pos=UDim2.fromOffset(20,16), FS=UDim2.new(1,-40,0,26)})
+
+    local ch = Instance.new("Frame")
+    ch.Size        = UDim2.fromOffset(54,54)
+    ch.Position    = UDim2.fromScale(0.5, 0.47)
+    ch.AnchorPoint = Vector2.new(0.5,0.5)
+    ch.BackgroundTransparency = 1
+    ch.Parent = modal
+    local circ = Instance.new("Frame")
+    circ.Size = UDim2.fromScale(1,1)
+    circ.BackgroundTransparency = 1
+    circ.Parent = ch
+    corner(circ, 100)
+    stroke(circ, Color3.fromRGB(130,130,140), 3, 0)
+    local chk = Instance.new("ImageLabel")
+    chk.Size = UDim2.fromScale(0.72,0.72)
+    chk.Position = UDim2.fromScale(0.5,0.5)
+    chk.AnchorPoint = Vector2.new(0.5,0.5)
+    chk.BackgroundTransparency = 1
+    chk.Image = "rbxassetid://3944680095"
+    chk.ImageColor3 = Color3.fromRGB(160,160,170)
+    chk.Parent = ch
+
+    lbl(modal, {
+        Text  = "You gifted " .. productInfo.Name .. " to " .. recipient .. "!",
+        Size  = 14, Color = Config.TextSub,
+        Pos   = UDim2.fromOffset(30,122), FS = UDim2.new(1,-60,0,38),
+        Wrap  = true, Align = Enum.TextXAlignment.Center,
+        Font  = Enum.Font.GothamMedium, Z = 3,
+    })
+
+    local ok = Instance.new("TextButton")
+    ok.Size = UDim2.new(1,-40,0,36)
+    ok.Position = UDim2.fromOffset(20,162)
+    ok.BackgroundColor3 = Config.BuyAccent
+    ok.Text = "OK"
+    ok.Font = Enum.Font.GothamBold
+    ok.TextSize = 15
+    ok.TextColor3 = Color3.new(1,1,1)
+    ok.AutoButtonColor = false
+    ok.Parent = modal
+    corner(ok, 8)
+
+    local xBtn = Instance.new("TextButton")
+    xBtn.Position = UDim2.new(1,-10,0,10)
+    xBtn.AnchorPoint = Vector2.new(1,0)
+    xBtn.Size = UDim2.fromOffset(24,24)
+    xBtn.BackgroundTransparency = 1
+    xBtn.Text = "×"
+    xBtn.Font = Enum.Font.GothamBold
+    xBtn.TextSize = 22
+    xBtn.TextColor3 = Config.TextSub
+    xBtn.ZIndex = 10
+    xBtn.Parent = modal
+
+    -- Animate modal in from below + checkmark pops in
+    modal.Position = UDim2.fromScale(0.5, 0.6)
+    modal.Size = UDim2.fromOffset(400, 210)
+    modal:TweenPosition(UDim2.fromScale(0.5, 0.5), Enum.EasingDirection.Out, Enum.EasingStyle.Back, 0.4, true)
+    -- Checkmark scales in
+    ch.Size = UDim2.fromOffset(0, 0)
+    task.delay(0.3, function()
+        if not ch.Parent then return end
+        TweenService:Create(ch, TweenInfo.new(0.35, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
+            {Size = UDim2.fromOffset(54, 54)}):Play()
+    end)
+    -- Circle stroke draws in
+    circ.Rotation = -90
+    task.delay(0.5, function()
+        if not circ.Parent then return end
+        TweenService:Create(circ, TweenInfo.new(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+            {Rotation = 0}):Play()
+    end)
+
+    local function finish()
+        gui:Destroy()
+    end
+    ok.MouseButton1Click:Connect(finish)
+    xBtn.MouseButton1Click:Connect(finish)
+end
+
+-- ============================================================
+--  HAZEHUB BUY MODAL (NATIVE DESIGN)
+-- ============================================================
+local function showBuyModal(productInfo, recipient)
+    local price = productInfo.PriceInRobux or 0
+    local old = playerGui:FindFirstChild("HazeHub_NativeBuy")
+    if old then old:Destroy() end
+
+    local sg = Instance.new("ScreenGui", playerGui)
+    sg.Name = "HazeHub_NativeBuy"
+    sg.DisplayOrder = 1000
+
+    local main = Instance.new("Frame", sg)
+    main.Size = UDim2.fromOffset(440, 260)
+    main.Position = UDim2.fromScale(0.5, 0.45)
+    main.AnchorPoint = Vector2.new(0.5, 0.5)
+    main.BackgroundColor3 = Color3.fromRGB(25, 25, 31)
+    corner(main, 12)
+
+    -- Hiển thị Robux hiện có
+    local bal = lbl(main, {
+        Text = fmtComma(Config.FakeBalance),
+        Size = 15, Pos = UDim2.new(1, -130, 0, 15), FS = UDim2.new(0, 100, 0, 24),
+        Align = Enum.TextXAlignment.Right, Font = Enum.Font.GothamBold
+    })
+    robuxIcon(main, 18, UDim2.new(1, -25, 0, 18))
+
+    -- Thông tin Item
+    local icon = Instance.new("ImageLabel", main)
+    icon.Size = UDim2.fromOffset(90, 90)
+    icon.Position = UDim2.fromOffset(30, 60)
+    icon.BackgroundColor3 = Color3.fromRGB(40, 40, 46)
+    icon.Image = productInfo.Icon
+    corner(icon, 10)
+
+    lbl(main, {Text = productInfo.Name, Size = 20, Pos = UDim2.fromOffset(135, 65), Font = Enum.Font.GothamBold})
+    lbl(main, {Text = fmtComma(price), Size = 19, Pos = UDim2.fromOffset(165, 95)})
+    robuxIcon(main, 20, UDim2.fromOffset(135, 96))
+
+    -- Nút xác nhận với thanh tải xanh
+    local btn = Instance.new("TextButton", main)
+    btn.Size = UDim2.new(1, -60, 0, 52)
+    btn.Position = UDim2.new(0.5, 0, 1, -85)
+    btn.AnchorPoint = Vector2.new(0.5, 0)
+    btn.BackgroundColor3 = Color3.fromRGB(55, 55, 61)
+    btn.Text = ""; btn.AutoButtonColor = false; btn.Active = false
+    corner(btn, 8)
+
+    local load = Instance.new("Frame", btn)
+    load.Size = UDim2.fromScale(0, 1); load.BackgroundColor3 = Color3.fromRGB(0, 115, 255); load.BorderSizePixel = 0
+    corner(load, 8)
+
+    local bTxt = lbl(btn, {Text = "Confirm Purchase", Size = 17, Align = Enum.TextXAlignment.Center, Z = 5, Font = Enum.Font.GothamBold})
+
+    lbl(main, {
+        Text = "Gifting to [" .. recipient .. "]",
+        Size = 12, Pos = UDim2.new(0, 0, 1, -28), Color = Color3.fromRGB(150, 150, 155), Align = Enum.TextXAlignment.Center
+    })
+
+    -- Đóng bảng
+    local x = Instance.new("TextButton", main)
+    x.Text = "×"; x.Size = UDim2.fromOffset(30, 30); x.Position = UDim2.new(1, -35, 0, 10)
+    x.BackgroundTransparency = 1; x.TextColor3 = Color3.fromRGB(150, 150, 150); x.TextSize = 30
+    x.MouseButton1Click:Connect(function() sg:Destroy() end)
+
+    -- Hiệu ứng chạy thanh tải
+    task.spawn(function()
+        local tw = TweenService:Create(load, TweenInfo.new(2.8, Enum.EasingStyle.Quad), {Size = UDim2.fromScale(1, 1)})
+        tw:Play()
+        tw.Completed:Wait()
+        btn.Active = true
+    end)
+
+    btn.MouseButton1Click:Connect(function()
+        if not btn.Active then return end
+        Config.FakeBalance = math.max(0, Config.FakeBalance - price)
+        sg:Destroy()
+        showGiftNotification(productInfo.Name, recipient)
+    end)
+end
+
+-- ============================================================
+--  HELPERS
+-- ============================================================
+local function findFruitByName(text)
+    if not text then return nil end
+
+    -- First try to extract the fruit name from the exact BF label format:
+    -- "Gifting [username] <Permanent FruitName>" or "Permanent FruitName"
+    -- This avoids matching fruit names that appear inside usernames
+
+    -- Extract from <Permanent FruitName> pattern
+    local fromTag = text:match("<Permanent%s+(.-)>") or text:match("Permanent%s+(%a+)")
+    if fromTag then
+        local clean = fromTag:match("^%s*(.-)%s*$") -- trim
+        for _, f in ipairs(Fruits) do
+            if f.name:lower() == clean:lower() then return f end
+        end
+    end
+
+    -- Fallback: only match if fruit name appears as a whole word (surrounded by
+    -- non-alpha chars or string boundaries) — prevents "ice" matching "iceoirea34"
+    local lower = text:lower()
+    for _, f in ipairs(Fruits) do
+        local fname = f.name:lower()
+        -- Use word boundary pattern: fruit name must NOT be preceded or followed by a letter/number
+        local pattern = "(^|[^%a%d])" .. fname .. "([^%a%d]|$)"
+        if lower:match("[^%a%d]" .. fname .. "[^%a%d]")
+            or lower:match("^" .. fname .. "[^%a%d]")
+            or lower:match("[^%a%d]" .. fname .. "$")
+            or lower:match("^" .. fname .. "$") then
+            return f
+        end
+    end
+    return nil
+end
+
+local function findFruitById(id)
+    for _, f in ipairs(Fruits) do
+        if f.id == id then return f end
+    end
+    return nil
+end
+
+local function fruitToProductInfo(fruit)
+    return {
+        Name         = "Permanent " .. fruit.name,
+        AssetId      = fruit.id,
+        PriceInRobux = fruit.price,
+        Icon         = fruit.icon,
+        Outline      = fruit.outline,
+    }
+end
+
+-- ============================================================
+--  HAZEHUB SETTINGS (ICON H)
+-- ============================================================
+local setGui = Instance.new("ScreenGui", playerGui)
+setGui.ResetOnSpawn = false
+
+local hIcon = Instance.new("TextButton", setGui)
+hIcon.Size = UDim2.fromOffset(50, 50); hIcon.Position = UDim2.new(0, 15, 0.5, 0)
+hIcon.BackgroundColor3 = Color3.fromRGB(20, 20, 25); hIcon.Text = "H"; hIcon.TextColor3 = Color3.fromRGB(255, 30, 30)
+hIcon.Font = "GothamBlack"; hIcon.TextSize = 25
+corner(hIcon, 100)
+local stroke = Instance.new("UIStroke", hIcon); stroke.Color = Color3.fromRGB(255, 30, 30); stroke.Thickness = 2
+
+local panel = Instance.new("Frame", setGui)
+panel.Size = UDim2.fromOffset(220, 150); panel.Position = UDim2.fromOffset(75, 250)
+panel.BackgroundColor3 = Color3.fromRGB(30, 30, 35); panel.Visible = false
+corner(panel, 10)
+
+lbl(panel, {Text = "SET FAKE ROBUX", Size = 11, Pos = UDim2.fromOffset(15, 20), Color = Color3.fromRGB(200, 200, 200)})
+local input = Instance.new("TextBox", panel)
+input.Size = UDim2.new(1, -30, 0, 35); input.Position = UDim2.fromOffset(15, 45)
+input.BackgroundColor3 = Color3.fromRGB(20, 20, 25); input.Text = tostring(Config.FakeBalance)
+input.TextColor3 = Color3.new(1, 1, 1); corner(input, 6)
+
+local apply = Instance.new("TextButton", panel)
+apply.Size = UDim2.new(1, -30, 0, 35); apply.Position = UDim2.fromOffset(15, 95)
+apply.BackgroundColor3 = Color3.fromRGB(255, 30, 30); apply.Text = "Apply Changes"; apply.Font = "GothamBold"
+apply.TextColor3 = Color3.new(1, 1, 1); corner(apply, 8)
+
+apply.MouseButton1Click:Connect(function()
+    local val = tonumber(input.Text:gsub("%D", ""))
+    if val then Config.FakeBalance = val end
+    apply.Text = "Success!"
+    task.wait(1); apply.Text = "Apply Changes"
+end)
+
+hIcon.MouseButton1Click:Connect(function() panel.Visible = not panel.Visible end)
+
+-- Logic kéo thả đơn giản
+local drag = false; local start; local startPos
+hIcon.InputBegan:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 then drag = true; start = i.Position; startPos = hIcon.Position end end)
+UserInputService.InputChanged:Connect(function(i)
+    if drag and i.UserInputType == Enum.UserInputType.MouseMovement then
+        local delta = i.Position - start
+        hIcon.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    end
+end)
+hIcon.InputEnded:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 then drag = false end end)
+
+-- ============================================================
+--  HAZEHUB ADVANCED HOOK ENGINE V3 (FULL INTERCEPTION)
+-- ============================================================
+
+local HookSystem = {
+    Connections = {},
+    Cache = {
+        TargetPlayer = "Unknown",
+        TargetFruit = nil
+    },
+    Active = true
+}
+
+-- [LỚP 1]: Quét dữ liệu từ nhãn hệ thống của Blox Fruits
+local function syncGiftContext()
+    local success, result = pcall(function()
+        local uiNodes = playerGui:GetDescendants()
+        for i = 1, #uiNodes do
+            local node = uiNodes[i]
+            if node:IsA("TextLabel") and node.Visible then
+                local txt = node.Text or ""
+                -- Nhận diện cấu trúc Gifting của Blox Fruits
+                if txt:find("Gifting") and txt:find("Permanent") then
+                    -- Lấy tên người nhận
+                    local userMatch = txt:match("%[(.-)%]")
+                    if userMatch then HookSystem.Cache.TargetPlayer = userMatch end
+                    
+                    -- Lấy tên trái ác quỷ
+                    local fruitMatch = txt:match("<Permanent%s+(.-)>") or txt:match("%]%s*(.+)$")
+                    if fruitMatch then
+                        local fruitData = findFruitByName(fruitMatch)
+                        if fruitData then HookSystem.Cache.TargetFruit = fruitData end
+                    end
+                end
+            end
+        end
+    end)
+    return success
+end
+
+-- [LỚP 2]: Chặn đứng Metamethod (Chống bảng mua Roblox)
+local function initiateMetamethodHook()
+    local mt = getrawmetatable(game)
+    local oldNamecall = mt.__namecall
+    setreadonly(mt, false)
+
+    mt.__namecall = newcclosure(function(self, ...)
+        local method = getnamecallmethod()
+        local args = {...}
+
+        if not checkcaller() and self == MarketplaceService then
+            if method == "PromptPurchase" or method == "PromptProductPurchase" or method == "PromptGamePassPurchase" then
+                syncGiftContext()
+                
+                local productId = tonumber(args[2])
+                local fruit = (productId and findFruitById(productId)) or HookSystem.Cache.TargetFruit
+                
+                if fruit then
+                    -- Thực hiện hiển thị bảng giả thay vì bảng thật
+                    task.defer(function()
+                        showBuyModal(fruitToProductInfo(fruit), HookSystem.Cache.TargetPlayer)
+                    end)
+                    -- Trả về nil để chặn hoàn toàn bảng mua của Roblox
+                    return nil
+                end
+            end
+        end
+        return oldNamecall(self, ...)
+    end)
+    setreadonly(mt, true)
+end
+
+-- [LỚP 3]: Hijack Button (Đè Overlay lên nút xác nhận)
+local function secureButton(btn)
+    if not (btn:IsA("TextButton") or btn:IsA("ImageButton")) then return end
+    if btn:FindFirstChild("_HazeSecurityLayer") then return end
+
+    local text = (btn.Text or ""):lower()
+    local name = (btn.Name or ""):lower()
+
+    -- Kiểm tra xem nút có chứa giá tiền Robux hoặc từ khóa mua hàng không
+    local isPrice = text:match("%d%d%d+") -- Tìm dãy số (giá Robux)
+    local isAction = text:find("gift") or name:find("buy") or name:find("confirm")
+
+    if isPrice or isAction then
+        local overlay = Instance.new("TextButton")
+        overlay.Name = "_HazeSecurityLayer"
+        overlay.Size = UDim2.fromScale(1, 1)
+        overlay.Position = UDim2.fromScale(0, 0)
+        overlay.BackgroundTransparency = 1
+        overlay.Text = ""
+        overlay.ZIndex = 10000 -- Đảm bảo luôn nằm trên cùng
+        overlay.Parent = btn
+
+        -- Chặn các kết nối gốc của game để nút thật không hoạt động
+        if getconnections then
+            for _, conn in ipairs(getconnections(btn.MouseButton1Click)) do conn:Disable() end
+            for _, conn in ipairs(getconnections(btn.Activated)) do conn:Disable() end
+        end
+
+        overlay.MouseButton1Click:Connect(function()
+            syncGiftContext()
+            local fruit = HookSystem.Cache.TargetFruit or {name = "Kitsune", price = 4000} -- Fallback
+            showBuyModal(fruitToProductInfo(fruit), HookSystem.Cache.TargetPlayer)
+        end)
+    end
+end
+
+-- [LỚP 4]: Giám sát thời gian thực (Runtime Monitor)
+task.spawn(function()
+    while HookSystem.Active do
+        -- Quét các nút mới xuất hiện
+        local allGui = playerGui:GetDescendants()
+        for j = 1, #allGui do
+            pcall(secureButton, allGui[j])
+        end
+        
+        -- Cập nhật dữ liệu người nhận mỗi 0.5s
+        syncGiftContext()
+        task.wait(0.5)
+    end
+end)
+
+-- Kích hoạt
+pcall(initiateMetamethodHook)
