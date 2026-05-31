@@ -600,6 +600,12 @@ local function updatePanelPos()
 end
 updatePanelPos()
 
+-- DÁN ĐOẠN NÚT ẨN/HIỆN UI Ở ĐÂY
+
+local ph = Instance.new("Frame")
+ph.Size             = UDim2.new(1,0,0,40)
+ph.BackgroundColor3 = Config.PanelRedDark
+
 local ph = Instance.new("Frame")
 ph.Size             = UDim2.new(1,0,0,40)
 ph.BackgroundColor3 = Config.PanelRedDark
