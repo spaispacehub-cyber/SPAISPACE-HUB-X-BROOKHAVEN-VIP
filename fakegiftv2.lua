@@ -81,7 +81,7 @@ local Fruits = {
         icon    = "rbxthumb://type=Asset&id=71929406555073&w=150&h=150",
         outline = Color3.fromRGB(180,60,20)
     },
-    {name="tiger", id=44669724, price=3000, icon=BLOX_LOGO, outline=Color3.fromRGB(200,160,20)  },
+    {name="tiger", id=44669724, price=3000, icon   = "rbxthumb://type=Asset&id=106563484423236&w=150&h=150", outline=Color3.fromRGB(200,160,20)  },
     {name="Kitsune", id=44669728, price=4000,
         icon    = "rbxthumb://type=Asset&id=102325862990442&w=150&h=150",
         outline = Color3.fromRGB(20,100,220)
