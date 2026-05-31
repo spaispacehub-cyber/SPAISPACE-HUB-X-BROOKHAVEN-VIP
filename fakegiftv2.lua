@@ -613,19 +613,16 @@ hideBtn.ZIndex = 100
 hideBtn.Parent = settingsGui
 corner(hideBtn,100)
 
-local uiHidden = false
-
 hideBtn.MouseButton1Click:Connect(function()
-	uiHidden = not uiHidden
-
-	if uiHidden then
-		island.Visible = false
-		panel.Visible = false
-		hideBtn.Text = "+"
-	else
-		island.Visible = true
-		hideBtn.Text = "X"
+	if panel and panel.Parent then
+		panel:Destroy()
 	end
+
+	if island and island.Parent then
+		island:Destroy()
+	end
+
+	hideBtn:Destroy()
 end)
 
 local ph = Instance.new("Frame")
