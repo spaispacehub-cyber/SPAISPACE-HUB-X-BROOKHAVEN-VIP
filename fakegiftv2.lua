@@ -600,7 +600,33 @@ local function updatePanelPos()
 end
 updatePanelPos()
 
--- DÁN ĐOẠN NÚT ẨN/HIỆN UI Ở ĐÂY
+-- Mobile Hide / Show UI
+local hideBtn = Instance.new("TextButton")
+hideBtn.Size = UDim2.fromOffset(40,40)
+hideBtn.Position = UDim2.new(0,80,0.5,-28)
+hideBtn.BackgroundColor3 = Color3.fromRGB(255,38,38)
+hideBtn.Text = "X"
+hideBtn.TextColor3 = Color3.new(1,1,1)
+hideBtn.Font = Enum.Font.GothamBold
+hideBtn.TextSize = 18
+hideBtn.ZIndex = 100
+hideBtn.Parent = settingsGui
+corner(hideBtn,100)
+
+local uiHidden = false
+
+hideBtn.MouseButton1Click:Connect(function()
+	uiHidden = not uiHidden
+
+	if uiHidden then
+		island.Visible = false
+		panel.Visible = false
+		hideBtn.Text = "+"
+	else
+		island.Visible = true
+		hideBtn.Text = "X"
+	end
+end)
 
 local ph = Instance.new("Frame")
 ph.Size             = UDim2.new(1,0,0,40)
