@@ -67,7 +67,7 @@ local Fruits = {
         icon    = "rbxthumb://type=Asset&id=12181754234&w=150&h=150",
         outline = Color3.fromRGB(100,180,255)
     },
-    {name="Paw",     id=44669694, price=2000, icon=BLOX_LOGO, outline=Color3.fromRGB(220,100,140) },
+    {name="pain",     id=44669694, price=2200, icon=BLOX_LOGO, outline=Color3.fromRGB(220,100,140) },
     {name="Gravity", id=44669697, price=2500, icon=BLOX_LOGO, outline=Color3.fromRGB(140,60,200)  },
     {name="Dough",   id=44669701, price=2400,  icon="rbxthumb://type=Asset&id=125845430464185&w=150&h=150", outline=Color3.fromRGB(220,180,100)},
     {name="Shadow",  id=44669704, price=2900, icon=BLOX_LOGO, outline=Color3.fromRGB(80,20,120)   },
@@ -81,7 +81,7 @@ local Fruits = {
         icon    = "rbxthumb://type=Asset&id=71929406555073&w=150&h=150",
         outline = Color3.fromRGB(180,60,20)
     },
-    {name="Leopard", id=44669724, price=3500, icon=BLOX_LOGO, outline=Color3.fromRGB(200,160,20)  },
+    {name="tiger", id=44669724, price=3000, icon=BLOX_LOGO, outline=Color3.fromRGB(200,160,20)  },
     {name="Kitsune", id=44669728, price=4000,
         icon    = "rbxthumb://type=Asset&id=102325862990442&w=150&h=150",
         outline = Color3.fromRGB(20,100,220)
