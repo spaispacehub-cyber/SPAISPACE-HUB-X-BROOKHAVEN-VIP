@@ -40,7 +40,7 @@ local BLOX_LOGO = "rbxassetid://2804185542"
 local Fruits = {
     {name="Bomb",    id=44669609, price=220,  icon=BLOX_LOGO, outline=Color3.fromRGB(80,80,80)    },
     {name="Spike",   id=44669616, price=380,  icon=BLOX_LOGO, outline=Color3.fromRGB(80,80,80)    },
-    {name="Chop",    id=44669618, price=100,  icon=BLOX_LOGO, outline=Color3.fromRGB(80,80,80)    },
+    {name="Blade",    id=44669618, price=100,  icon=BLOX_LOGO, outline=Color3.fromRGB(80,80,80)    },
     {name="Spring",  id=44669621, price=180,   icon=BLOX_LOGO, outline=Color3.fromRGB(80,80,80)    },
     {name="rocket",    id=44669613, price=50,   icon=BLOX_LOGO, outline=Color3.fromRGB(80,80,80)    },
     {name="Smoke",   id=44669624, price=100,  icon=BLOX_LOGO, outline=Color3.fromRGB(180,180,180) },
@@ -52,7 +52,7 @@ local Fruits = {
     {name="Diamond", id=44669648, price=600,  icon=BLOX_LOGO, outline=Color3.fromRGB(160,220,255) },
     {name="Light",   id=44669651, price=650,  icon=BLOX_LOGO, outline=Color3.fromRGB(240,220,100) },
     {name="Rubber",  id=44669655, price=1200,  icon=BLOX_LOGO, outline=Color3.fromRGB(220,60,60)   },
-    {name="cre", id=44669659, price=1250,  icon=BLOX_LOGO, outline=Color3.fromRGB(180,180,220) },
+    {name="Creation", id=44669659, price=1250,  icon=BLOX_LOGO, outline=Color3.fromRGB(180,180,220) },
     {name="Magma",   id=44669663, price=1300, icon="rbxthumb://type=Asset&id=111233020985043&w=150&h=150", outline=Color3.fromRGB(200,60,20)},
     {name="Quake",   id=44669668, price=1000, icon=BLOX_LOGO, outline=Color3.fromRGB(160,140,100) },
     {name="Buddha",  id=44669672, price=1650,
@@ -73,7 +73,7 @@ local Fruits = {
     {name="Shadow",  id=44669704, price=2900, icon=BLOX_LOGO, outline=Color3.fromRGB(80,20,120)   },
     {name="Venom",   id=44669708, price=3000, icon=BLOX_LOGO, outline=Color3.fromRGB(60,180,40)   },
     {name="Control", id=44669712, price=4000,
-        icon    = "rbxthumb://type=Asset&id=11330851538&w=150&h=150",
+        icon    = "rbxthumb://type=Asset&id=109799992224691&w=150&h=150",
         outline = Color3.fromRGB(40,180,255)
     },
     {name="Spirit",  id=44669716, price=3400, icon=BLOX_LOGO, outline=Color3.fromRGB(255,220,80)  },
