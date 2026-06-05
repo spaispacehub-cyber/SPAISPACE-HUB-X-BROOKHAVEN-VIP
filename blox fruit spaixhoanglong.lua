@@ -1,5 +1,5 @@
 game.StarterGui:SetCore("SendNotification", {
-    Title = "Aura Hub",
+    Title = "SPAISPACEHUBZZZ x Hoang Long Hub",
     Text = "Success Loading",
     Icon = "rbxthumb://type=Asset&id=131484641795167&w=420&h=420",
     Duration = 5,
