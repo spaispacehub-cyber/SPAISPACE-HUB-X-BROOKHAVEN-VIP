@@ -325,7 +325,7 @@ local function showPurchaseDone(productInfo, recipient)
     chk.AnchorPoint = Vector2.new(0.5, 0.5)
     chk.Position    = UDim2.fromScale(0.5, 0.5)
     chk.BackgroundTransparency = 1
-    chk.Image       = "rbxassetid://73668117359633"
+    chk.Image       = "rbxassetid://111891433782700"
     chk.ImageColor3 = Color3.fromRGB(220, 220, 235)
     chk.ZIndex = 4
     chk.Parent = ch
